@@ -14,7 +14,7 @@ Most of what makes up a life today — email threads, phone photos, text message
 
 A **capsule**: a standardized, self-describing package of a person's digital records, built on existing preservation standards rather than a new proprietary format, with:
 
-- **Plain files as payload** — content stays as ordinary files, understandable without our software, even decades from now
+- **Standard formats as payload** — content stays as ordinary files in their native format (text, JPEG, MP4, whatever they actually are), not repackaged into a proprietary container, and openable without our software even decades from now
 - **A human context layer** — biography, timeline, people, places: the annotations that turn a folder of files into a historical record
 - **Integrity guarantees** — cryptographic manifests (SHA-256) so corruption or tampering can be detected
 - **Privacy as a first-class concern** — sensitive-data scanning, redaction tooling, and multiple privacy zones (public, restricted, never-release)

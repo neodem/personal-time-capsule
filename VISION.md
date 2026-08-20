@@ -23,7 +23,7 @@ A person with no special technical expertise can:
 5. **Deposit** it with an institution (or several, for redundancy) that can preserve, verify, and replicate the capsule *without* being able to read it before the release date
 6. **Trust** that if their first-choice institution disappears, a defined succession chain keeps the archive from being orphaned
 
-And a future archivist or historian, decades or centuries later, can open a capsule with nothing more exotic than a filesystem, a text editor, and a published specification — no proprietary software required.
+And a future archivist or historian, decades or centuries later, can open a capsule with nothing more exotic than a filesystem, ordinary standard software (a text editor, an image viewer, a media player — whatever the file actually calls for), and a published specification — no proprietary software required.
 
 ## What this project is not
 

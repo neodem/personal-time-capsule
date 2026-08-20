@@ -33,7 +33,7 @@ The creator decides to start a capsule. No files have moved yet — this is the 
 
 ## 2. Import
 
-Raw records — email exports, photo libraries, documents, audio, video — are brought into the capsule's directory structure as plain files (Principle #3). Nothing is transformed or judged yet; this stage is mechanical.
+Raw records — email exports, photo libraries, documents, audio, video — are brought into the capsule's directory structure in their native, standard formats (Principle #3). Nothing is transformed or judged yet; this stage is mechanical.
 
 - **Actor:** creator/assistant.
 - **Notable:** Principle #6 (preserve the mess) applies from this stage forward — import should never require sorting, renaming, or cleanup as a precondition.
@@ -107,7 +107,7 @@ Trustees provide their keys or key-shares; if a quorum scheme is in place, enoug
 
 ## 11. Access
 
-The beneficiary — named individuals, an institution, or the public, per the creator's original choice — can now read the capsule: plain files plus the human-context layer, openable with nothing more than a filesystem, a text editor, and the published specification (Principle #3).
+The beneficiary — named individuals, an institution, or the public, per the creator's original choice — can now read the capsule: standard-format files plus the human-context layer, openable with nothing more than a filesystem, ordinary non-proprietary software, and the published specification (Principle #3).
 
 - **Actors:** beneficiary/recipient; eventually, future researcher/historian.
 - **Notable:** access doesn't have to be all-or-nothing if the creator set different policies per collection (`README.md`) — a "never-release" privacy zone, for instance, may never reach this stage even after everything else does.

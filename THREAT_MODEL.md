@@ -18,7 +18,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 - File formats, codecs, or container formats become unreadable as the software that produced them disappears.
 - This is a threat to the **payload content itself**, distinct from the wrapper around it. Personal Time Capsule cannot force a creator's files into a longer-lived format than they already are — it can only avoid making the problem worse by wrapping them in something proprietary (Principle #3).
 
-*Mitigation direction:* plain files as payload, preference for open/durable formats where the tooling has a choice (e.g. export formats), PREMIS-style format metadata so a future custodian at least knows what it's dealing with. Full format-migration tooling is out of scope for Phase 1.
+*Mitigation direction:* payload stays in its native, standard format rather than a proprietary container, preference for open/durable formats where the tooling has a choice (e.g. export formats), PREMIS-style format metadata so a future custodian at least knows what it's dealing with. Full format-migration tooling is out of scope for Phase 1.
 
 ## 3. Institutional collapse
 

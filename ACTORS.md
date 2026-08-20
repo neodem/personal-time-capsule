@@ -72,7 +72,7 @@ Anyone — a custodian, a successor evaluating whether to accept a transfer, a r
 
 The long-horizon beneficiary the whole project is ultimately for (see `VISION.md`) — someone, decades or centuries out, trying to understand a life or a period through the capsule.
 
-- **Can:** once access is granted, read the capsule using nothing more than a filesystem, a text editor, and the published specification (Principle #3) — no proprietary software, and ideally no still-existing organization, required.
+- **Can:** once access is granted, read the capsule using nothing more than a filesystem, ordinary standard software (a text editor, an image viewer, a media player — whatever the file calls for), and the published specification (Principle #3) — no proprietary software, and ideally no still-existing organization, required.
 - **Can't:** assume every capsule they encounter followed later, improved versions of the spec — versioning and backward-readability are a specification-phase concern this actor makes real.
 
 ## Toolmaker / maintainer
