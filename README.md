@@ -31,7 +31,7 @@ We are **not** trying to replace the existing digital preservation field. We're 
 - [OAIS](https://www.iso.org/standard/81907.html) (ISO 14721) — the broader reference model
 - [LOCKSS](https://www.lockss.org/) — distributed, "lots of copies keep stuff safe" preservation philosophy
 
-See [`PRINCIPLES.md`](./PRINCIPLES.md) for the design commitments and [`VISION.md`](./VISION.md) for the fuller mission and roadmap.
+See [`STANDARDS.md`](./STANDARDS.md) for what each of these is, why we depend on it, and what it's specifically used for here. See [`PRINCIPLES.md`](./PRINCIPLES.md) for the design commitments and [`VISION.md`](./VISION.md) for the fuller mission and roadmap.
 
 ## Status
 
