@@ -41,4 +41,7 @@ We want archivists, historians, preservation specialists, cryptographers, and es
 
 ## License
 
-TBD — likely Apache-2.0 or MIT for code/tooling, and something like CC BY for the specification itself. Open to discussion.
+This project uses two licenses for two different kinds of content:
+
+- **Code and tooling** (the reference CLI and any other software this project produces) — [Apache License 2.0](./LICENSE). Chosen over MIT for its explicit patent grant, which matters given the encryption and key-splitting schemes involved.
+- **Specification and documentation** (this README, `PRINCIPLES.md`, `VISION.md`, `THREAT_MODEL.md`, `ACTORS.md`, `LIFECYCLE.md`, `STANDARDS.md`, and the eventual formal capsule spec) — [CC BY 4.0](./LICENSE-SPEC.md). Anyone can use, adapt, or even commercialize the spec, provided they credit the project.
