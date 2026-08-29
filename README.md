@@ -35,7 +35,7 @@ See [`STANDARDS.md`](./STANDARDS.md) for what each of these is, why we depend on
 
 ## Status
 
-Early design phase. Phase 1 (name, mission, principles, threat model, actors, capsule lifecycle) is done — see [`PRINCIPLES.md`](./PRINCIPLES.md), [`THREAT_MODEL.md`](./THREAT_MODEL.md), [`ACTORS.md`](./ACTORS.md), and [`LIFECYCLE.md`](./LIFECYCLE.md). We're now in Phase 2 (specification): [`FORMAT.md`](./FORMAT.md) has a first draft of the directory structure and `capsule.yaml`. See [`research/`](./research) for open questions and background reading, and the [issues](../../issues) for active discussion.
+Early design phase. Phase 1 (name, mission, principles, threat model, actors, capsule lifecycle) is done — see [`PRINCIPLES.md`](./PRINCIPLES.md), [`THREAT_MODEL.md`](./THREAT_MODEL.md), [`ACTORS.md`](./ACTORS.md), and [`LIFECYCLE.md`](./LIFECYCLE.md). We're now in Phase 2 (specification): [`FORMAT.md`](./FORMAT.md) has a first draft of the directory structure and `capsule.yaml`. See [`ROADMAP.md`](./ROADMAP.md) for the full numbered item list and current status, [`research/`](./research) for open questions and background reading, and the [issues](../../issues) for active discussion.
 
 We want archivists, historians, preservation specialists, cryptographers, and estate lawyers to poke holes in this. If something here is naive, wrong, or has already been solved better elsewhere, please say so — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) for how.
 

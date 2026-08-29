@@ -1,6 +1,6 @@
 # Capsule Format (draft)
 
-This is the first pass at Phase 2 (Specification): the on-disk directory structure and the `capsule.yaml` file that acts as a capsule's "constitution." It's deliberately a first draft — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) if something here should be challenged.
+This is the first pass at Phase 2 (Specification) — see [`ROADMAP.md`](./ROADMAP.md) items 7 and 8 — covering the on-disk directory structure and the `capsule.yaml` file that acts as a capsule's "constitution." It's deliberately a first draft — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) if something here should be challenged.
 
 A worked example lives at [`examples/capsule.yaml`](./examples/capsule.yaml).
 
@@ -54,7 +54,7 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ### `access`
 
-`default_privacy_zone` (one of `public`, `restricted`, `never-release`, per `PRINCIPLES.md` #7 / `THREAT_MODEL.md` #8 / `LIFECYCLE.md` stage 4) and `default_release_policy`, which every collection inherits unless it overrides. Release policy `type` is one of: `immediate`, `fixed_date`, `after_death`, `after_death_plus_years`, `never`, or `custom` — matching the options `README.md` already commits to. The full semantics of each policy type are Phase 2 item 14 (access/release model) and aren't fully specified yet; this schema just fixes the vocabulary.
+`default_privacy_zone` (one of `public`, `restricted`, `never-release`, per `PRINCIPLES.md` #7 / `THREAT_MODEL.md` #8 / `LIFECYCLE.md` stage 4) and `default_release_policy`, which every collection inherits unless it overrides. Release policy `type` is one of: `immediate`, `fixed_date`, `after_death`, `after_death_plus_years`, `never`, or `custom` — matching the options `README.md` already commits to. The full semantics of each policy type are [`ROADMAP.md`](./ROADMAP.md) item 14 (access/release model) and aren't fully specified yet; this schema just fixes the vocabulary.
 
 ### `custody`
 
@@ -62,7 +62,7 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ### `encryption`
 
-**Deliberately a stub.** `status` (`planned` / `encrypted` / `none`) and the *shape* of key custody (a `quorum` scheme with `required`-of-`of` trustees) are declared so tooling has something stable to build against, but no algorithm or key-splitting scheme is named yet — that's Phase 2 item 13 (encryption model), a separate, dedicated design discussion, not something to back into via this file.
+**Deliberately a stub.** `status` (`planned` / `encrypted` / `none`) and the *shape* of key custody (a `quorum` scheme with `required`-of-`of` trustees) are declared so tooling has something stable to build against, but no algorithm or key-splitting scheme is named yet — that's [`ROADMAP.md`](./ROADMAP.md) item 13 (encryption model), a separate, dedicated design discussion, not something to back into via this file.
 
 ### `integrity`
 
@@ -74,11 +74,11 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ## Open questions
 
-- The full **privacy model** (Phase 2 item 12) needs to define how per-item overrides work when a collection-level zone isn't granular enough (e.g. one restricted email in an otherwise-public collection).
+- The full **privacy model** ([`ROADMAP.md`](./ROADMAP.md) item 12) needs to define how per-item overrides work when a collection-level zone isn't granular enough (e.g. one restricted email in an otherwise-public collection).
 - The full **access/release model** (item 14) needs to formalize what each `release_policy.type` actually requires (e.g. what confirms an `after_death` trigger — see `ACTORS.md`, executor/estate representative).
 - The full **custody/succession model** (item 15) needs to define what "successor activation" actually looks like procedurally, beyond the chain being declared.
 - The **encryption model** (item 13) is intentionally undecided here; `encryption.key_custody.scheme: quorum` assumes *a* threshold scheme exists but doesn't commit to Shamir's Secret Sharing or any other specific mechanism.
 
 ## Status
 
-First pass, written during Phase 2 (Specification), covering roadmap items 7 (directory structure) and 8 (`capsule.yaml`). Everything here should be considered a draft open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.
+First pass, written during Phase 2 (Specification), covering [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`). Everything here should be considered a draft open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.
