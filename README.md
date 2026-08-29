@@ -37,7 +37,7 @@ See [`STANDARDS.md`](./STANDARDS.md) for what each of these is, why we depend on
 
 Early design phase. We're currently working through Phase 1 (name, mission, principles, threat model, actors, capsule lifecycle) before touching schemas or code. See [`research/`](./research) for open questions and background reading, and the [issues](../../issues) for active discussion.
 
-We want archivists, historians, preservation specialists, cryptographers, and estate lawyers to poke holes in this. If something here is naive, wrong, or has already been solved better elsewhere, please say so.
+We want archivists, historians, preservation specialists, cryptographers, and estate lawyers to poke holes in this. If something here is naive, wrong, or has already been solved better elsewhere, please say so — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) for how.
 
 ## License
 
