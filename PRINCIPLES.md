@@ -12,7 +12,7 @@ The creator decides what goes in, what doesn't, who receives it, when it becomes
 
 ## 3. No proprietary lock-in
 
-A capsule must remain intelligible without our software. If this project and every tool it ever produced vanished tomorrow, a capsule created today should still be readable with a filesystem, a text editor, and the published specification. This is why the project builds on BagIt rather than inventing a new binary container — payload content stays as ordinary files, not something trapped inside a proprietary serialization.
+A capsule must remain intelligible without our software. If this project and every tool it ever produced vanished tomorrow, a capsule created today should still be readable with a filesystem, ordinary non-proprietary software (a text editor for text, standard viewers/players for images, audio, and video), and the published specification. This is why the project builds on BagIt rather than inventing a new binary container — payload content stays in its native, standard format, not something trapped inside a proprietary serialization. "Plain" here means *no proprietary wrapper*, not that every file is human-readable text — a JPEG or an MP4 is still a plain file in this sense, just a binary one.
 
 ## 4. Open source and open standard, forever
 
