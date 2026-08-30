@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/neodem/personal-time-capsule/schema/capsule.schema.json",
+  "title": "Personal Time Capsule — capsule.yaml",
+  "description": "Structural schema for a capsule's root tag file. See ../FORMAT.md for the field-by-field explanation and rationale. This schema covers ROADMAP.md items 7-8 (structure) only — it deliberately does not encode the deeper semantics of privacy zones, release policies, custody, or encryption, which are separate, not-yet-written model documents (ROADMAP.md items 12-15).",
+  "type": "object",
+  "required": ["capsule", "access", "integrity", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "capsule": {
+      "type": "object",
+      "description": "Identity of the capsule itself.",
+      "required": ["spec_version", "id", "created"],
+      "additionalProperties": false,
+      "properties": {
+        "spec_version": {
+          "type": "string",
+          "pattern": "^PTC-[0-9]+\\.[0-9]+$",
+          "description": "The capsule format version this file conforms to, e.g. \"PTC-0.1\"."
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A stable, unique identifier for this capsule (e.g. a urn:uuid)."
+        },
+        "created": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date the capsule was originated (Lifecycle stage 1)."
+        },
+        "creator": {
+          "type": "object",
+          "description": "Optional per Principle #2 — the creator controls what identifying information appears here at all, including whether this object is present.",
+          "additionalProperties": true,
+          "properties": {
+            "name": { "type": "string" },
+            "contact": { "type": "string" }
+          }
+        }
+      }
+    },
+    "purpose": {
+      "type": "object",
+      "description": "Optional free-text framing of what this particular capsule is.",
+      "additionalProperties": true,
+      "properties": {
+        "description": { "type": "string" }
+      }
+    },
+    "collections": {
+      "type": "array",
+      "description": "Named groupings of payload content under data/. Optional — a capsule need not declare any.",
+      "items": { "$ref": "#/$defs/collection" }
+    },
+    "access": {
+      "type": "object",
+      "description": "Capsule-wide defaults that every collection inherits unless it overrides.",
+      "required": ["default_privacy_zone", "default_release_policy"],
+      "additionalProperties": false,
+      "properties": {
+        "default_privacy_zone": { "$ref": "#/$defs/privacy_zone" },
+        "default_release_policy": { "$ref": "#/$defs/release_policy" }
+      }
+    },
+    "custody": {
+      "type": "object",
+      "description": "Primary custodian and fallback succession chain (Threat Model #3, Actors — successor custodian). Optional — not every capsule has a custodian yet.",
+      "additionalProperties": false,
+      "properties": {
+        "primary": { "$ref": "#/$defs/custodian" },
+        "successors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/custodian" }
+        }
+      }
+    },
+    "encryption": {
+      "type": "object",
+      "description": "Deliberately a stub — see ROADMAP.md item 13. Declares the shape of key custody only; no algorithm or key-splitting mechanism is fixed by this schema.",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["planned", "encrypted", "none"]
+        },
+        "key_custody": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "scheme": {
+              "type": "string",
+              "description": "Currently only \"quorum\" is used in practice; left as a free string since the encryption model (item 13) may introduce others."
+            },
+            "quorum": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "required": { "type": "integer", "minimum": 1 },
+                "of": { "type": "integer", "minimum": 1 }
+              }
+            },
+            "trustees": {
+              "type": "array",
+              "description": "Trustee identity structure isn't designed yet (items 13/15) — intentionally unconstrained.",
+              "items": true
+            }
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["manifest_algorithm"],
+      "additionalProperties": false,
+      "properties": {
+        "manifest_algorithm": {
+          "type": "string",
+          "enum": ["sha256"],
+          "description": "Matches BagIt's manifest-sha256.txt / tagmanifest-sha256.txt. See STANDARDS.md."
+        }
+      }
+    },
+    "status": {
+      "type": "object",
+      "required": ["lifecycle_stage"],
+      "additionalProperties": false,
+      "properties": {
+        "lifecycle_stage": {
+          "type": "string",
+          "enum": [
+            "origination",
+            "import",
+            "annotation",
+            "screening",
+            "sealing",
+            "encryption",
+            "deposit",
+            "dormant_preservation",
+            "release_trigger",
+            "unlock",
+            "access"
+          ],
+          "description": "Which LIFECYCLE.md stage this capsule instance currently sits in."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "privacy_zone": {
+      "type": "string",
+      "enum": ["public", "restricted", "never-release"],
+      "description": "PRINCIPLES.md #7 / THREAT_MODEL.md #8 / LIFECYCLE.md stage 4."
+    },
+    "release_policy": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["immediate", "fixed_date", "after_death", "after_death_plus_years", "never", "custom"]
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Required when type is fixed_date."
+        },
+        "years": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Required when type is after_death_plus_years."
+        },
+        "description": {
+          "type": "string",
+          "description": "Required when type is custom — free-text description of the policy, since custom has no other defined semantics yet (ROADMAP.md item 14)."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "fixed_date" } } },
+          "then": { "required": ["date"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "after_death_plus_years" } } },
+          "then": { "required": ["years"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "custom" } } },
+          "then": { "required": ["description"] }
+        }
+      ]
+    },
+    "collection": {
+      "type": "object",
+      "required": ["name", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "privacy_zone": { "$ref": "#/$defs/privacy_zone" },
+        "release_policy": { "$ref": "#/$defs/release_policy" }
+      }
+    },
+    "custodian": {
+      "type": "object",
+      "description": "Intentionally loose pending ROADMAP.md item 15 (custody/succession model) — 'institution' is the only role ACTORS.md currently defines, but this schema doesn't yet foreclose others.",
+      "required": ["name"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "type": "string" }
+      }
+    }
+  }
+}
