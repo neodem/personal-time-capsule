@@ -12,9 +12,10 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 
 - **Phase**: Phase 2 (Specification), per [`ROADMAP.md`](./ROADMAP.md) — the canonical, numbered, status-tracked list of everything left to do across all five phases. Read that file, not this section, for current progress; this section is deliberately not a duplicate of it.
 - Phase 1 (Definition) is fully done: `README.md`, `VISION.md`, `PRINCIPLES.md`, `THREAT_MODEL.md`, `ACTORS.md`, `LIFECYCLE.md`, `STANDARDS.md` are all on `main`.
-- Phase 2 is underway: `FORMAT.md` and `examples/capsule.yaml` draft the directory structure and `capsule.yaml` (ROADMAP items 7–8). Items 9–15 (human-readable docs, metadata/integrity/privacy/encryption/access/custody models) are not started.
+- Phase 2 items 7–8 (directory structure, `capsule.yaml`) are done: `FORMAT.md`, `schema/capsule.schema.json`, and a real validated example bag at `examples/minimal-capsule/`. Items 9–15 (human-readable docs, metadata/integrity/privacy/encryption/access/custody models) are not started.
 - Licensing is decided: Apache-2.0 for code/tooling (`LICENSE`), CC BY 4.0 for the specification/docs (`LICENSE-SPEC.md`) — no longer TBD.
 - `CONTRIBUTING.md` and a "challenge an assumption" GitHub issue template exist, giving Principle #10 (build in public, invite disagreement) an actual mechanism.
+- An experimental Rust CLI prototype exists at `cli/` (`ptc init` only, non-interactive) — Phase 4 work started early/for-fun, out of the normal roadmap order (ROADMAP item 21). See `cli/README.md`, including a documented Windows GNU-toolchain build gotcha.
 - `research/origin/2026-08-20-initial-conversation.md` is the founding design conversation, kept as a frozen provenance record — don't treat it as a living roadmap; that's what `ROADMAP.md` is for.
 - No reference CLI or other code exists yet (Phase 4).
 
