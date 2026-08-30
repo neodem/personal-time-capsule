@@ -15,8 +15,8 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 
 ## Phase 2 — Specification 🚧
 
-7. 🚧 Directory structure — `FORMAT.md`
-8. 🚧 `capsule.yaml` — `FORMAT.md`, `examples/capsule.yaml`
+7. ✅ Directory structure — `FORMAT.md`, `examples/minimal-capsule/`
+8. ✅ `capsule.yaml` — `FORMAT.md`, `schema/capsule.schema.json`, `examples/capsule.yaml`, `examples/minimal-capsule/capsule.yaml`
 9. ⬜ Human-readable documentation (a plain-language guide for a non-technical creator, distinct from the technical spec)
 10. ⬜ Metadata model (PREMIS-aligned object/event/provenance fields — see `STANDARDS.md`)
 11. ⬜ Integrity model (beyond `capsule.yaml`'s `manifest_algorithm` field — fixity-check cadence, what a failed check triggers)

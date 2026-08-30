@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../schema/capsule.schema.json
 # capsule.yaml — a Personal Time Capsule's "constitution."
 #
 # This is a worked, heavily annotated EXAMPLE, not a schema file — field
@@ -11,12 +12,12 @@
 capsule:
   spec_version: "PTC-0.1"
   id: "urn:uuid:3f29c1de-9b1a-4c7e-8e0a-2a6f7e5b6d10"
-  created: 2026-08-29
+  created: "2026-08-29"
   creator:
     # Per PRINCIPLES.md #2, the creator controls what identifying
     # information appears here at all — everything under `creator`
     # beyond `id`/`created` above is optional.
-    name: "Jane Example"
+    name: "Jane Smith"
     contact: "jane@example.org"
 
 purpose:
@@ -61,7 +62,7 @@ access:
   default_release_policy:
     # one of: immediate | fixed_date | after_death | after_death_plus_years | never | custom
     type: fixed_date
-    date: 2076-08-20
+    date: "2076-08-20"
 
 custody:
   primary:

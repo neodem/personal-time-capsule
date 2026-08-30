@@ -1,8 +1,8 @@
 # Capsule Format (draft)
 
-This is the first pass at Phase 2 (Specification) — see [`ROADMAP.md`](./ROADMAP.md) items 7 and 8 — covering the on-disk directory structure and the `capsule.yaml` file that acts as a capsule's "constitution." It's deliberately a first draft — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) if something here should be challenged.
+Phase 2 (Specification) — see [`ROADMAP.md`](./ROADMAP.md) items 7 and 8 — covering the on-disk directory structure and the `capsule.yaml` file that acts as a capsule's "constitution." Structurally settled and validated against a real example bag (see Status below), but still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
-A worked example lives at [`examples/capsule.yaml`](./examples/capsule.yaml).
+A heavily annotated reference example lives at [`examples/capsule.yaml`](./examples/capsule.yaml), and a small, complete, working example bag — real payload files, real checksums, a `capsule.yaml` instance validated against the schema below — lives at [`examples/minimal-capsule/`](./examples/minimal-capsule/). A machine-checkable schema lives at [`schema/capsule.schema.json`](./schema/capsule.schema.json).
 
 ## Directory structure
 
@@ -11,7 +11,7 @@ A capsule is a [BagIt](https://www.rfc-editor.org/rfc/rfc8493) bag (see [`STANDA
 ```
 <capsule-root>/
 ├── bagit.txt                 # BagIt required: version + tag-file encoding
-├── bag-info.txt               # BagIt standard: baging date, size, etc.
+├── bag-info.txt               # BagIt standard: bagging date, size, etc.
 ├── manifest-sha256.txt        # BagIt required: checksums of everything under data/
 ├── tagmanifest-sha256.txt     # checksums of the tag files below (capsule.yaml, bag-info.txt, ...)
 ├── capsule.yaml                # this capsule's constitution — see below
@@ -38,7 +38,29 @@ Two decisions worth calling out explicitly:
 
 Collection directory names under `data/` (`photos/`, `email/`, `writing/`, ...) are creator-defined — nothing in the format requires a fixed taxonomy. `capsule.yaml`'s `collections` list is what actually names and describes them.
 
+### Tag files
+
+`bagit.txt` is fixed, two-line, required-by-RFC-8493 content — every capsule's is identical:
+
+```
+BagIt-Version: 1.0
+Tag-File-Character-Encoding: UTF-8
+```
+
+`bag-info.txt` is a standard BagIt tag file of `Key: Value` metadata lines. This project's profile recommends:
+
+- `Bagging-Date` — when the bag was assembled (Lifecycle stage 5, Sealing)
+- `Payload-Oxum` — `<total payload bytes>.<total payload file count>`, BagIt's standard sanity-check field
+- `External-Identifier` — should match `capsule.yaml`'s `capsule.id`, so a bag can be cross-checked against its own constitution without parsing YAML
+- `Bag-Software-Agent`, `External-Description` — recommended but not required
+
+Fields like `Source-Organization` or `Contact-Name`/`Contact-Email` are standard BagIt fields but intentionally **not** required here — per Principle #2, the creator controls what identifying information appears at all, same as `capsule.yaml`'s `creator` block.
+
+See [`examples/minimal-capsule/bag-info.txt`](./examples/minimal-capsule/bag-info.txt) for a real, filled-in example, and [`examples/minimal-capsule/manifest-sha256.txt`](./examples/minimal-capsule/manifest-sha256.txt) / [`tagmanifest-sha256.txt`](./examples/minimal-capsule/tagmanifest-sha256.txt) for real computed checksums.
+
 ## `capsule.yaml`
+
+A machine-checkable schema for this file lives at [`schema/capsule.schema.json`](./schema/capsule.schema.json) (JSON Schema draft 2020-12 — validates the YAML once parsed). One gotcha worth calling out: **date fields (`capsule.created`, `access.default_release_policy.date`) must be written as quoted strings** (`created: "2026-08-30"`), not bare YAML date literals (`created: 2026-08-30`). Unquoted, YAML parsers auto-convert these to native date objects rather than strings, which then fail JSON Schema's `string`/`format: date` check — this bit the example capsules during drafting and would bite any future `ptc verify` implementation the same way.
 
 ### `capsule`
 
@@ -81,4 +103,4 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ## Status
 
-First pass, written during Phase 2 (Specification), covering [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`). Everything here should be considered a draft open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.
+Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). What's still open is everything the "Open questions" section above lists — the *semantic* models (items 12–15) that give meaning to the vocabulary this document fixes. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.

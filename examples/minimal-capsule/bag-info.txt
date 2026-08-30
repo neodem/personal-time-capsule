@@ -1,0 +1,5 @@
+Bagging-Date: 2026-08-30
+Payload-Oxum: 2532.8
+Bag-Software-Agent: personal-time-capsule (hand-built reference example; no CLI exists yet)
+External-Identifier: urn:uuid:7c2e9f10-4b3d-4e2a-9a71-5d8f3c1b2e40
+External-Description: Personal Time Capsule -- minimal example capsule for the PTC-0.1 specification.

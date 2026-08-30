@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=../../schema/capsule.schema.json
+# capsule.yaml for this minimal example capsule (examples/minimal-capsule/).
+# Unlike ../capsule.yaml (an annotated reference with no real payload),
+# this is a small, COMPLETE, working example: every collection below
+# corresponds to real files under data/, and manifest-sha256.txt /
+# tagmanifest-sha256.txt hold real SHA-256 checksums of those files.
+# See ../../FORMAT.md.
+
+capsule:
+  spec_version: "PTC-0.1"
+  id: "urn:uuid:7c2e9f10-4b3d-4e2a-9a71-5d8f3c1b2e40"
+  created: "2026-08-30"
+  creator:
+    name: "Jane Smith"
+    contact: "jane@example.org"
+
+purpose:
+  description: >
+    A minimal, illustrative Personal Time Capsule demonstrating the
+    PTC-0.1 directory structure and capsule.yaml format. Not a real
+    archive — all names, dates, and content are fictional.
+
+collections:
+  - name: person
+    path: data/person
+
+  - name: photos
+    path: data/photos
+
+  - name: email
+    path: data/email
+    privacy_zone: restricted
+    release_policy:
+      type: after_death_plus_years
+      years: 50
+
+  - name: writing
+    path: data/writing
+
+access:
+  default_privacy_zone: public
+  default_release_policy:
+    type: immediate
+
+custody:
+  primary:
+    name: "TBD — a special collections department or similar institution"
+    type: institution
+  successors:
+    - name: "TBD — fallback institution #1"
+      type: institution
+
+encryption:
+  status: none
+
+integrity:
+  manifest_algorithm: sha256
+
+status:
+  lifecycle_stage: sealing

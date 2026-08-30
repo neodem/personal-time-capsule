@@ -1,0 +1,9 @@
+- id: sam-smith
+  relationship: spouse
+  note: Married Jane in 2005.
+- id: priya-smith
+  relationship: daughter
+  note: Born 2007.
+- id: alex-smith
+  relationship: son
+  note: Born 2009.

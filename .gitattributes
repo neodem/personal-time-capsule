@@ -1,0 +1,19 @@
+# Force LF line endings on checkout regardless of the cloning machine's
+# core.autocrlf setting. This matters more here than in a typical repo:
+# BagIt manifests (manifest-sha256.txt, tagmanifest-sha256.txt) record
+# exact SHA-256 checksums of tag and payload files. If a checkout
+# silently converted LF to CRLF (the common Windows Git default), every
+# recorded checksum would stop matching the actual file bytes -- a
+# false "corrupted" result for a file that was never touched.
+* text=auto eol=lf
+
+# Known/likely binary payload types: never touch line endings, never
+# count toward text-vs-binary heuristics.
+*.gif -text
+*.jpg -text
+*.jpeg -text
+*.png -text
+*.mp4 -text
+*.mp3 -text
+*.wav -text
+*.pdf -text
