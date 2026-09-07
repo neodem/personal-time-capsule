@@ -53,7 +53,7 @@ Donor acknowledges that the Capsule may contain material referencing, depicting,
 This Deed incorporates by reference:
 
 - This Capsule's own `capsule.yaml`, including its recorded `access` (privacy zone and release policy) terms;
-- The Access Restriction Agreement, if executed separately: *not yet executed in this illustrative example*;
+- The Access Restriction Agreement, dated 2026-08-30 (see `legal/access-restriction-agreement.md` in this bag);
 - The Custodian Agreement, if executed separately: *not yet executed in this illustrative example*.
 
 In the event of a conflict between this Deed and any of the above: [TO BE DETERMINED — NEEDS LEGAL REVIEW; see `DEED_OF_GIFT.md`].
