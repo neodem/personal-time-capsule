@@ -16,7 +16,7 @@ Per [`PRINCIPLES.md`](./PRINCIPLES.md) #5, the rule is: build on existing, well-
 
 **Why we depend on it:** PREMIS gives us a vocabulary for the preservation metadata that has to travel alongside payload content — provenance, format, integrity events, and the actions taken on an object over time — instead of us having to invent metadata fields that a real archivist wouldn't recognize.
 
-**What it's used for here:** Format information (what a file is, what produced it) and the history of preservation-relevant events (import, screening, sealing, fixity checks, succession transfers) described in `LIFECYCLE.md` and `THREAT_MODEL.md` #2 and #9 are expected to be expressed in PREMIS-compatible terms once Phase 2 defines the capsule's metadata schema.
+**What it's used for here:** The history of preservation-relevant events (import, screening, sealing, fixity checks, succession transfers) described in `LIFECYCLE.md` and `THREAT_MODEL.md` #2, #3, #5, and #9 is recorded in `data/provenance/events.yaml`, at event/batch granularity rather than a full per-file PREMIS Object record for every payload item — see [`METADATA.md`](./METADATA.md) (`ROADMAP.md` item 10) for the model and the reasoning behind that scope decision.
 
 **In plain terms:** PREMIS (PREservation Metadata: Implementation Strategies) is a data dictionary — a defined, widely-adopted set of metadata fields — that digital archives use to record what a digital object is, where it came from, and what has happened to it, so that a future custodian who has never seen the object before can still understand its history and trustworthiness.
 

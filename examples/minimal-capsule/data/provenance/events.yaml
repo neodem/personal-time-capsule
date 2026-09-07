@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=../../../../schema/events.schema.json
+# data/provenance/events.yaml — see ../../../../METADATA.md for the field
+# reference. Real, illustrative event history for this example capsule.
+
+- date: "2026-08-25"
+  type: origination
+  agent: "Jane Smith (creator)"
+
+- date: "2026-08-26"
+  type: import
+  agent: "Jane Smith (creator)"
+  collection: photos
+  source: "Personal photo library export"
+
+- date: "2026-08-26"
+  type: import
+  agent: "Jane Smith (creator)"
+  collection: writing
+  source: "Local documents folder"
+
+- date: "2026-08-27"
+  type: import
+  agent: "Jane Smith (creator)"
+  collection: email
+  source: "Email export (single illustrative message)"
+
+- date: "2026-08-28"
+  type: annotation
+  agent: "Jane Smith (creator)"
+  collection: person
+  note: "Wrote biography, timeline, people, and places"
+
+- date: "2026-08-29"
+  type: screening
+  agent: "Jane Smith (creator)"
+  collection: email
+  outcome: "Reviewed; set to restricted, released 50 years after death"
+
+- date: "2026-08-30"
+  type: sealing
+  agent: "personal-time-capsule (hand-built reference example; no CLI exists yet)"

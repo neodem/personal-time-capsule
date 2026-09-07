@@ -23,6 +23,8 @@ A capsule is a [BagIt](https://www.rfc-editor.org/rfc/rfc8493) bag (see [`STANDA
     │   ├── timeline.md
     │   ├── people.yaml
     │   └── places.yaml
+    ├── provenance/               # event/provenance log — see METADATA.md
+    │   └── events.yaml           # recommended, not required
     ├── photos/
     ├── email/
     ├── writing/
@@ -35,6 +37,7 @@ Two decisions worth calling out explicitly:
 
 - **`capsule.yaml` is a tag file, not payload.** It lives at the bag root, alongside `bagit.txt`, and is checksummed via `tagmanifest-sha256.txt` rather than `manifest-sha256.txt`. It describes and governs the capsule; it isn't itself part of the historical record.
 - **The human-context layer (`data/person/`) *is* payload.** Biography, timeline, people, and places are treated as part of the archival content itself (Principle #6 — the annotations that turn a folder of files into a historical record are as much "the record" as the photos and email are), not as packaging metadata about it. They're checksummed in `manifest-sha256.txt` alongside everything else under `data/`.
+- **The event/provenance log (`data/provenance/`) is also payload**, for the same reason — see [`METADATA.md`](./METADATA.md) (`ROADMAP.md` item 10) for what it records and why.
 
 Collection directory names under `data/` (`photos/`, `email/`, `writing/`, ...) are creator-defined — nothing in the format requires a fixed taxonomy. `capsule.yaml`'s `collections` list is what actually names and describes them.
 

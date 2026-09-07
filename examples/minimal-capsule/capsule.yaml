@@ -24,6 +24,9 @@ collections:
   - name: person
     path: data/person
 
+  - name: provenance
+    path: data/provenance
+
   - name: photos
     path: data/photos
 

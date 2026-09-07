@@ -12,7 +12,7 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 
 - **Phase**: Phase 2 (Specification), per [`ROADMAP.md`](./ROADMAP.md) — the canonical, numbered, status-tracked list of everything left to do across all five phases. Read that file, not this section, for current progress; this section is deliberately not a duplicate of it.
 - Phase 1 (Definition) is fully done: `README.md`, `VISION.md`, `PRINCIPLES.md`, `THREAT_MODEL.md`, `ACTORS.md`, `LIFECYCLE.md`, `STANDARDS.md` are all on `main`.
-- Phase 2 items 7–9 are done: `FORMAT.md`, `schema/capsule.schema.json`, a real validated example bag at `examples/minimal-capsule/`, and `CREATOR_GUIDE.md` (plain-language guide for a non-technical creator, item 9). Items 10–15 (metadata/integrity/privacy/encryption/access/custody models) are not started.
+- Phase 2 items 7–10 are done: `FORMAT.md`, `schema/capsule.schema.json`, a real validated example bag at `examples/minimal-capsule/`, `CREATOR_GUIDE.md` (plain-language guide for a non-technical creator, item 9), and `METADATA.md`/`schema/events.schema.json` (the PREMIS-aligned event/provenance log, `data/provenance/events.yaml`, item 10). Items 11–15 (integrity/privacy/encryption/access/custody models) are not started — check `ROADMAP.md` directly, this section lags merges.
 - Licensing is decided: Apache-2.0 for code/tooling (`LICENSE`), CC BY 4.0 for the specification/docs (`LICENSE-SPEC.md`) — no longer TBD.
 - `CONTRIBUTING.md` and a "challenge an assumption" GitHub issue template exist, giving Principle #10 (build in public, invite disagreement) an actual mechanism.
 - An experimental Rust CLI prototype exists at `cli/` (`ptc init` only, non-interactive) — Phase 4 work started early/for-fun, out of the normal roadmap order (ROADMAP item 21). See `cli/README.md`, including a documented Windows GNU-toolchain build gotcha.
@@ -30,6 +30,7 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 - Release policy is **configurable per collection** (e.g., photos vs. email vs. private journal can each have different lock periods), not one global unlock date.
 - No promise of "cryptographically impossible to open" — layered protection (crypto + legal + custodial), documented assumptions, no dependency on any single external service surviving decades.
 - **Preserve the mess** — raw/unedited material is welcome; curation is additive, never required.
+- **Metadata is event/batch-granularity, not per-file.** `data/provenance/events.yaml` (payload, like `data/person/`) logs what happened to the capsule as a whole or to a named collection — imports, screenings, sealing, fixity checks, succession transfers — with free-text provenance on import events. Deliberately no PREMIS Object record per payload file; that's redundant with the BagIt manifest and works against Principle #6. See `METADATA.md`.
 - Privacy tooling (sensitive-data scanning, redaction, privacy zones: public/restricted/never-release) is core, not an add-on.
 
 ## Working style / workflow preferences
@@ -43,7 +44,7 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 
 ## Suggested first task for a new session
 
-Continue Phase 2 per `ROADMAP.md` items 10–15. The most natural next pieces, since `FORMAT.md`'s "Open questions" section already flags them as gaps in the current `capsule.yaml` draft:
+Continue Phase 2 per `ROADMAP.md` items 11–15. The most natural next pieces, since `FORMAT.md`'s "Open questions" section already flags them as gaps in the current `capsule.yaml` draft:
 
 - **Privacy model** (item 12) — how per-item overrides work when a collection-level zone isn't granular enough
 - **Access/release model** (item 14) — what actually satisfies each `release_policy.type` (e.g. what confirms an `after_death` trigger)

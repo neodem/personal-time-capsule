@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/neodem/personal-time-capsule/schema/events.schema.json",
+  "title": "Personal Time Capsule — data/provenance/events.yaml",
+  "description": "Structural schema for a capsule's append-only event/provenance log. See ../METADATA.md for the field-by-field explanation and rationale. Covers ROADMAP.md item 10 (metadata model) only.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/event" },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "required": ["date", "type", "agent"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional stable identifier for this event (e.g. \"evt-2026-08-30-import-email\"), useful if a future object-level metadata record ever needs to reference back to the event that produced it."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date the event occurred. Must be a quoted string, per the same YAML gotcha documented in FORMAT.md."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "origination",
+            "import",
+            "annotation",
+            "screening",
+            "sealing",
+            "encryption",
+            "deposit",
+            "dormant_preservation",
+            "release_trigger",
+            "unlock",
+            "access",
+            "fixity_check",
+            "succession_transfer",
+            "trustee_attestation"
+          ],
+          "description": "The first 11 values match capsule.yaml's status.lifecycle_stage enum (LIFECYCLE.md's main stages). The last 3 are recurring sub-events named in LIFECYCLE.md stage 8 that aren't stage transitions themselves."
+        },
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Free text identifying who or what performed this event — a person and their ACTORS.md role (e.g. \"Jane Smith (creator)\"), or a piece of software and version (e.g. \"ptc CLI v0.1\"). Not a structured registry — see METADATA.md's open questions."
+        },
+        "collection": {
+          "type": "string",
+          "description": "Optional. When an event pertains to one named collection rather than the whole capsule, this should match a collections[].name entry in capsule.yaml."
+        },
+        "source": {
+          "type": "string",
+          "description": "Optional. Free-text provenance description — primarily for import events, e.g. \"Gmail Takeout export, jane@example.org\"."
+        },
+        "outcome": {
+          "type": "string",
+          "description": "Optional. Free-text result of the event, most relevant for fixity_check (e.g. \"pass\", \"3 files failed checksum\")."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional. Any other free-text context worth recording."
+        }
+      }
+    }
+  }
+}
