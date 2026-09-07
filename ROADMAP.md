@@ -18,7 +18,7 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 7. ✅ Directory structure — `FORMAT.md`, `examples/minimal-capsule/`
 8. ✅ `capsule.yaml` — `FORMAT.md`, `schema/capsule.schema.json`, `examples/capsule.yaml`, `examples/minimal-capsule/capsule.yaml`
 9. ✅ Human-readable documentation — `CREATOR_GUIDE.md` (a plain-language guide for a non-technical creator, distinct from the technical spec)
-10. ⬜ Metadata model (PREMIS-aligned object/event/provenance fields — see `STANDARDS.md`)
+10. ✅ Metadata model — `METADATA.md`, `schema/events.schema.json`, `examples/minimal-capsule/data/provenance/events.yaml` (PREMIS-aligned object/event/provenance fields — see `STANDARDS.md`)
 11. ⬜ Integrity model (beyond `capsule.yaml`'s `manifest_algorithm` field — fixity-check cadence, what a failed check triggers)
 12. ⬜ Privacy model (per-item overrides when a collection-level zone isn't granular enough; sensitive-data-scanning categories)
 13. ⬜ Encryption model (algorithm, key-splitting scheme — deliberately left unstubbed in `capsule.yaml`, see `FORMAT.md`)

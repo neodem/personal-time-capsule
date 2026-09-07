@@ -56,6 +56,11 @@ collections:
     # the human-context layer itself (biography, timeline, people, places)
     # no override: inherits the capsule default
 
+  - name: provenance
+    path: data/provenance
+    # the event/provenance log (see ../METADATA.md) — recommended, not
+    # required. no override: inherits the capsule default
+
 access:
   # one of: public | restricted | never-release
   default_privacy_zone: restricted
