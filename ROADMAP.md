@@ -27,13 +27,13 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 
 ## Phase 3 — Legal 🚧
 
-Unlike Phase 2's model documents, "🚧" here specifically means *drafted by non-lawyers, not yet reviewed by a licensed attorney, not usable as-is* — a stronger caveat than Phase 2's "open to challenge." See each document's own warning banner.
+Unlike Phase 2's model documents, "🚧" here specifically means *drafted by non-lawyers, not yet reviewed by a licensed attorney, not usable as-is* — a stronger caveat than Phase 2's "open to challenge." See each document's own warning banner. (Item 20, creator instructions, is the one exception — see its own entry below.)
 
 16. 🚧 Deed of gift — `DEED_OF_GIFT.md`, `templates/legal/deed-of-gift.md`, `examples/minimal-capsule/legal/deed-of-gift.md` (drafted by non-lawyers; not usable until reviewed by a licensed attorney)
 17. 🚧 Access restriction agreement — `ACCESS_RESTRICTION_AGREEMENT.md`, `templates/legal/access-restriction-agreement.md`, `examples/minimal-capsule/legal/access-restriction-agreement.md` (merges the founding conversation's "Access Restriction" and "Posthumous Release" sketches, since `ACCESS.md` already unified those triggers; breach is a new `CUSTODY.md` succession trigger)
 18. 🚧 Custodian agreement — `CUSTODIAN_AGREEMENT.md`, `templates/legal/custodian-agreement.md`, `examples/minimal-capsule/legal/custodian-agreement.md` (commits the fixity-check cadence and unresponsiveness timeout `INTEGRITY.md`/`CUSTODY.md` left as recommendations, and what counts as a documented breach)
 19. 🚧 Succession instructions — `SUCCESSION_INSTRUCTIONS.md`, `templates/legal/succession-instructions.md` + `certificate-of-succession.md` + `trustee-acceptance.md`, `examples/minimal-capsule/legal/succession-instructions.md` (gets every named successor custodian to pre-commit at deposit, rather than merely being named)
-20. ⬜ Creator instructions
+20. ✅ Creator instructions — `templates/legal/creator-instructions.md`, `examples/minimal-capsule/legal/creator-instructions.md` (a personal worksheet, not a binding agreement — no attorney-review caveat needed, since no institution's obligations depend on it; recommended to keep outside the sealed bag, with the creator's will, since unlike the other four documents it's meant to be updated over time)
 
 ## Phase 4 — Software ⬜
 
@@ -55,4 +55,4 @@ Put the spec in front of archivists, preservation specialists, and estate lawyer
 
 ## Status
 
-Phase 2 (Specification) is complete. We are now moving into **Phase 3 (Legal)**. Update this file's checkmarks as part of any PR that completes, drafts, or meaningfully advances an item.
+Phase 2 (Specification) is complete. Phase 3 (Legal) now has a first draft of every item (16-20) — but unlike Phase 2, Phase 3 isn't "done" just because a draft exists: items 16-19 explicitly require review by a licensed attorney before they're usable by anyone (see each document's own warning banner), which hasn't happened yet. Update this file's checkmarks as part of any PR that completes, drafts, or meaningfully advances an item.

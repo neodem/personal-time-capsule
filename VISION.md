@@ -40,7 +40,7 @@ And a future archivist or historian, decades or centuries later, can open a caps
 **Phase 4 — Software**: reference CLI (`init`, `import`, `inspect`, `scan`, `redact`, `encrypt`, `verify`, `unlock`, `deposit`)
 **Phase 5 — Real-world validation**: put it in front of archivists, preservation specialists, and estate lawyers, and expect to revise heavily
 
-See [`ROADMAP.md`](./ROADMAP.md) for the full numbered item list and current status. Phase 2 is complete; we are moving into **Phase 3**.
+See [`ROADMAP.md`](./ROADMAP.md) for the full numbered item list and current status. Phase 2 is complete, and **Phase 3** now has a first draft of every item — though its legal documents still need review by a licensed attorney before they're actually usable.
 
 ## Working slogan
 
