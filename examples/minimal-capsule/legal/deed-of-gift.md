@@ -54,7 +54,8 @@ This Deed incorporates by reference:
 
 - This Capsule's own `capsule.yaml`, including its recorded `access` (privacy zone and release policy) terms;
 - The Access Restriction Agreement, dated 2026-08-30 (see `legal/access-restriction-agreement.md` in this bag);
-- The Custodian Agreement, dated 2026-08-30 (see `legal/custodian-agreement.md` in this bag).
+- The Custodian Agreement, dated 2026-08-30 (see `legal/custodian-agreement.md` in this bag);
+- The Succession Instructions, dated 2026-08-30 (see `legal/succession-instructions.md` in this bag).
 
 In the event of a conflict between this Deed and any of the above: [TO BE DETERMINED — NEEDS LEGAL REVIEW; see `DEED_OF_GIFT.md`].
 

@@ -20,7 +20,9 @@ A capsule is a [BagIt](https://www.rfc-editor.org/rfc/rfc8493) bag (see [`STANDA
 ├── legal/                      # deed of gift, access-restriction agreement, etc. (Phase 3)
 │   ├── deed-of-gift.md          # see DEED_OF_GIFT.md — checksummed in tagmanifest, frozen at sealing
 │   ├── access-restriction-agreement.md  # see ACCESS_RESTRICTION_AGREEMENT.md — same treatment
-│   └── custodian-agreement.md   # see CUSTODIAN_AGREEMENT.md — same treatment
+│   ├── custodian-agreement.md   # see CUSTODIAN_AGREEMENT.md — same treatment
+│   └── succession-instructions.md  # see SUCCESSION_INSTRUCTIONS.md — same treatment. NOTE: a
+│                                    #   later Certificate of Succession is NOT added here — see below
 └── data/                       # BagIt payload — the actual archival content
     ├── person/                  # human-context layer
     │   ├── biography.md
@@ -45,6 +47,7 @@ Two decisions worth calling out explicitly:
 - **The event/provenance log (`data/provenance/`) is also payload**, for the same reason — see [`METADATA.md`](./METADATA.md) (`ROADMAP.md` item 10) for what it records and why.
 - **`preservation-log.yaml` is a tag file too, but a deliberately unprotected one** — the one file in a capsule that's expected to keep changing after sealing, and the only one intentionally excluded from both `manifest-sha256.txt` and `tagmanifest-sha256.txt`. See [`INTEGRITY.md`](./INTEGRITY.md) (`ROADMAP.md` item 11) for why sealing needed an escape hatch like this at all.
 - **`legal/`'s contents are checksummed in `tagmanifest-sha256.txt` and frozen at sealing.** A signed deed of gift or other legal instrument should be tamper-evident the moment it's executed — normally alongside the `custody` decision it formalizes, not something that needs to change afterward. See [`DEED_OF_GIFT.md`](./DEED_OF_GIFT.md) (`ROADMAP.md` item 16).
+- **A later Certificate of Succession is deliberately *not* added to `legal/`.** It's executed only if and when an actual succession event occurs, potentially decades after sealing — by which point `legal/` is long since frozen and can't accept new files. It's retained by the assuming custodian as its own record and referenced (not embedded) via a `succession_transfer` entry in `preservation-log.yaml`, the same pattern `ENCRYPTION.md` already uses for trustee share material living outside the bag. See [`SUCCESSION_INSTRUCTIONS.md`](./SUCCESSION_INSTRUCTIONS.md) (`ROADMAP.md` item 19).
 
 Collection directory names under `data/` (`photos/`, `email/`, `writing/`, ...) are creator-defined — nothing in the format requires a fixed taxonomy. `capsule.yaml`'s `collections` list is what actually names and describes them.
 
