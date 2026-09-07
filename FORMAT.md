@@ -87,7 +87,7 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ### `custody`
 
-`primary` custodian plus a `successors` list — the fallback chain from `THREAT_MODEL.md` #3 and `ACTORS.md` (successor custodian), so a capsule isn't orphaned if its first custodian collapses. Left as placeholders (`TBD`) in the example since no real capsule has a custodian yet.
+`primary` custodian plus a `successors` list — the fallback chain from `THREAT_MODEL.md` #3 and `ACTORS.md` (successor custodian), so a capsule isn't orphaned if its first custodian collapses. Left as placeholders (`TBD`) in the example since no real capsule has a custodian yet. This section is a frozen snapshot of the creator's original plan, not a live pointer — once succession actually happens, the real current custodian is tracked in `preservation-log.yaml`, not by rewriting this section. See [`CUSTODY.md`](./CUSTODY.md) (`ROADMAP.md` item 15) for what triggers succession and what it involves procedurally.
 
 ### `encryption`
 
@@ -105,9 +105,9 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 - ~~The full **privacy model** (item 12) needs to define how per-item overrides work when a collection-level zone isn't granular enough~~ Resolved — see [`PRIVACY.md`](./PRIVACY.md) and `privacy-overrides.yaml`.
 - ~~The full **access/release model** (item 14) needs to formalize what each `release_policy.type` actually requires~~ Resolved — see [`ACCESS.md`](./ACCESS.md): trustee quorum doubles as trigger confirmation for `after_death`/`after_death_plus_years`, recommending a two-source evidence minimum.
-- The full **custody/succession model** (item 15) needs to define what "successor activation" actually looks like procedurally, beyond the chain being declared.
+- ~~The full **custody/succession model** (item 15) needs to define what "successor activation" actually looks like procedurally~~ Resolved — see [`CUSTODY.md`](./CUSTODY.md): explicit-notice-or-unresponsiveness-timeout for custodians, reactive-only re-splitting for trustees, and the honest limit that an exhausted chain has no guaranteed resolution.
 - ~~The **encryption model** (item 13) is intentionally undecided here~~ Resolved — see [`ENCRYPTION.md`](./ENCRYPTION.md): `xchacha20-poly1305` and `slip-0039`, with collection-level key granularity.
 
 ## Status
 
-Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). What's still open is everything the "Open questions" section above still lists unstruck — the *semantic* model (item 15, custody/succession) that gives meaning to the remaining vocabulary this document fixes. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.
+Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). Every item the "Open questions" section above once listed is now resolved by a dedicated model document (`METADATA.md`, `INTEGRITY.md`, `PRIVACY.md`, `ENCRYPTION.md`, `ACCESS.md`, `CUSTODY.md`) — Phase 2 (Specification) is complete as of item 15. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.

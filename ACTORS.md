@@ -44,14 +44,14 @@ An archive, library, or other institution that physically/digitally holds, prese
 
 A custodian institution designated as a fallback if the primary custodian collapses (see `THREAT_MODEL.md` #3). Inert until activated.
 
-- **Can:** everything a custodian institution can, once the succession event occurs and the capsule (or a replica of it) is transferred to them.
+- **Can:** everything a custodian institution can, once the succession event occurs and the capsule (or a replica of it) is transferred to them. See `CUSTODY.md` for what actually triggers activation (explicit notice or a documented unresponsiveness timeout) and what verifying and accepting a transfer involves procedurally.
 - **Can't:** anything, before that point — they may not even know a given capsule exists until the chain activates.
 
 ## Key-holding trustee
 
 Whoever holds a decryption key, or a share of one (e.g. via secret-sharing across multiple trustees), for a capsule with a time- or condition-locked release policy. May be a person (family friend, executor, lawyer), an institution, or the custodian itself, depending on what the creator chooses.
 
-- **Can:** hold their key or key-share securely; participate in reconstructing the decryption capability once the release condition and quorum requirements (if any) are met; confirm their continued ability to do so, periodically, to the creator or custodian. For a death-triggered policy, expected to independently satisfy themselves the condition is genuinely met before contributing their share, not merely act on an executor's say-so — see `ACCESS.md`.
+- **Can:** hold their key or key-share securely; participate in reconstructing the decryption capability once the release condition and quorum requirements (if any) are met; confirm their continued ability to do so, periodically, to the creator or custodian. For a death-triggered policy, expected to independently satisfy themselves the condition is genuinely met before contributing their share, not merely act on an executor's say-so — see `ACCESS.md`. If flagged at risk (unreachable, resigning) while a live quorum still exists, participate in reconstructing and re-splitting the key with an adjusted roster — see `CUSTODY.md`.
 - **Can't:** unlock a capsule alone if the policy requires a quorum of multiple trustees (this is the main defense against both coercion and a single point of failure — see `THREAT_MODEL.md` #6 and #7); unlock early regardless of quorum, since the release condition itself (date, event) still has to be satisfied.
 
 ## Executor / estate representative

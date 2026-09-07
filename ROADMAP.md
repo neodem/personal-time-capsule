@@ -13,7 +13,7 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 5. ✅ Actors — `ACTORS.md`
 6. ✅ Capsule lifecycle — `LIFECYCLE.md`
 
-## Phase 2 — Specification 🚧
+## Phase 2 — Specification ✅
 
 7. ✅ Directory structure — `FORMAT.md`, `examples/minimal-capsule/`
 8. ✅ `capsule.yaml` — `FORMAT.md`, `schema/capsule.schema.json`, `examples/capsule.yaml`, `examples/minimal-capsule/capsule.yaml`
@@ -23,7 +23,7 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 12. ✅ Privacy model — `PRIVACY.md`, `schema/privacy-overrides.schema.json`, `examples/minimal-capsule/privacy-overrides.yaml` (per-item overrides when a collection-level zone isn't granular enough; sensitive-data-scanning categories)
 13. ✅ Encryption model — `ENCRYPTION.md` (XChaCha20-Poly1305, SLIP-0039 key splitting, collection-level granularity; algorithm/scheme were deliberately left unstubbed in `capsule.yaml`, see `FORMAT.md`)
 14. ✅ Access/release model — `ACCESS.md` (what actually satisfies each `release_policy.type` in `capsule.yaml`, e.g. what confirms an `after_death` trigger)
-15. ⬜ Custody/succession model (what "successor activation" looks like procedurally)
+15. ✅ Custody/succession model — `CUSTODY.md` (what "successor activation" looks like procedurally)
 
 ## Phase 3 — Legal ⬜
 
@@ -53,4 +53,4 @@ Put the spec in front of archivists, preservation specialists, and estate lawyer
 
 ## Status
 
-We are in **Phase 2**. Update this file's checkmarks as part of any PR that completes, drafts, or meaningfully advances an item.
+Phase 2 (Specification) is complete. We are now moving into **Phase 3 (Legal)**. Update this file's checkmarks as part of any PR that completes, drafts, or meaningfully advances an item.
