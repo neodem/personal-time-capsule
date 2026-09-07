@@ -1,0 +1,17 @@
+[package]
+name = "ptc"
+version = "0.1.0"
+edition = "2021"
+description = "Personal Time Capsule reference CLI"
+license = "Apache-2.0"
+repository = "https://github.com/neodem/personal-time-capsule"
+
+[[bin]]
+name = "ptc"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = "0.4"
+anyhow = "1"

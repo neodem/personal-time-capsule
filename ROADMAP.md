@@ -35,7 +35,9 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 
 ## Phase 4 — Software ⬜
 
-21. ⬜ `ptc init`
+Started early/experimentally (see `cli/`), out of order relative to Phases 2–3 — non-authoritative until the spec catches up.
+
+21. 🚧 `ptc init` — `cli/` (Rust; non-interactive/flags-only first pass, see `cli/README.md`)
 22. ⬜ `ptc import`
 23. ⬜ `ptc inspect`
 24. ⬜ `ptc scan`
