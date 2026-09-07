@@ -80,7 +80,7 @@ Same shape as `data/provenance/events.yaml` (see `METADATA.md`), with two additi
 
 ## Fixity-check cadence
 
-Recommended, not mandated: **at least annually** during dormant preservation, plus immediately after any custody or succession transfer, and before/after any physical media migration. This document sets the expectation; an actual enforceable commitment belongs in the Phase 3 custodian agreement (`ROADMAP.md` item 18), once real custodian relationships exist to know what's realistic. Per Principle #9 (no brittle promises), this spec doesn't itself obligate any custodian to a schedule it has no way to enforce.
+Recommended, not mandated: **at least annually** during dormant preservation, plus immediately after any custody or succession transfer, and before/after any physical media migration. This document sets the expectation; [`CUSTODIAN_AGREEMENT.md`](./CUSTODIAN_AGREEMENT.md) (`ROADMAP.md` item 18) turns it into an actual enforceable commitment. Per Principle #9 (no brittle promises), this spec doesn't itself obligate any custodian to a schedule it has no way to enforce — the agreement does that work.
 
 ## What a failed fixity check should trigger
 
@@ -97,7 +97,7 @@ As with cadence, the real obligations (who must do what, by when) are Phase 3 (`
 
 - **`preservation-log.yaml` is not itself tamper-evident.** It's deliberately outside the fixity net (that's the whole point), which means it's also, honestly, editable by anyone with write access to the capsule's storage — including a custodian trying to cover up a failed check or an unauthorized access. This document doesn't solve that; it documents the record, it doesn't cryptographically prove the record wasn't altered. A future revision could hash-chain entries (each entry committing to the previous one's hash) to at least make silent edits to *past* entries detectable — judged not worth the added complexity for a personal-scale v0.1, but flagged here for real reconsideration, especially given `THREAT_MODEL.md` #9 (insider threat).
 - **Who's authorized to append isn't defined yet.** Any custodian in the chain? Only the current primary? Does a newly activated successor custodian's first entry need to establish its own provenance somehow? This overlaps with `ROADMAP.md` item 15 (custody/succession model) and is deferred to it.
-- **Cadence and failed-check response are recommendations here, not enforced mechanisms.** `ROADMAP.md` item 18 (custodian agreement) is where an actual commitment gets made; this document exists so that agreement has something concrete to point at instead of starting from nothing.
+- ~~**Cadence and failed-check response are recommendations here, not enforced mechanisms.**~~ Resolved — [`CUSTODIAN_AGREEMENT.md`](./CUSTODIAN_AGREEMENT.md) (`ROADMAP.md` item 18) turns this document's recommendations into an actual binding commitment.
 
 ## Status
 

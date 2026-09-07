@@ -19,7 +19,8 @@ A capsule is a [BagIt](https://www.rfc-editor.org/rfc/rfc8493) bag (see [`STANDA
 ├── preservation-log.yaml       # post-seal event log — see INTEGRITY.md. NOT in either manifest, by design
 ├── legal/                      # deed of gift, access-restriction agreement, etc. (Phase 3)
 │   ├── deed-of-gift.md          # see DEED_OF_GIFT.md — checksummed in tagmanifest, frozen at sealing
-│   └── access-restriction-agreement.md  # see ACCESS_RESTRICTION_AGREEMENT.md — same treatment
+│   ├── access-restriction-agreement.md  # see ACCESS_RESTRICTION_AGREEMENT.md — same treatment
+│   └── custodian-agreement.md   # see CUSTODIAN_AGREEMENT.md — same treatment
 └── data/                       # BagIt payload — the actual archival content
     ├── person/                  # human-context layer
     │   ├── biography.md

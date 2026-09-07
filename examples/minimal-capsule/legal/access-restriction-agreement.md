@@ -68,7 +68,7 @@ This Agreement remains binding on Custodian, and on Riverside Public Library or 
 
 ## 6. Incorporation by Reference
 
-This Agreement incorporates by reference this Capsule's own `capsule.yaml`, the Deed of Gift dated 2026-08-30, and the Custodian Agreement, if executed separately: *not yet executed in this illustrative example*.
+This Agreement incorporates by reference this Capsule's own `capsule.yaml`, the Deed of Gift dated 2026-08-30, and the Custodian Agreement dated 2026-08-30 (see `legal/custodian-agreement.md` in this bag).
 
 ## 7. Governing Law
 
