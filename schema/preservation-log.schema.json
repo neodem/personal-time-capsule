@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/neodem/personal-time-capsule/schema/preservation-log.schema.json",
+  "title": "Personal Time Capsule — preservation-log.yaml",
+  "description": "Structural schema for a capsule's post-seal preservation log. See ../INTEGRITY.md for the field-by-field explanation and rationale. This file is deliberately NOT covered by manifest-sha256.txt or tagmanifest-sha256.txt — see INTEGRITY.md for why. Covers ROADMAP.md item 11 (integrity model) only.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/entry" },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["date", "type", "agent"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional stable identifier for this entry, same purpose as data/provenance/events.yaml's id field."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date the event occurred. Must be a quoted string, per the YAML gotcha documented in FORMAT.md."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "deposit",
+            "dormant_preservation",
+            "release_trigger",
+            "unlock",
+            "access",
+            "fixity_check",
+            "succession_transfer",
+            "trustee_attestation",
+            "reseal"
+          ],
+          "description": "The first 5 match the post-seal tail of capsule.yaml's status.lifecycle_stage enum. fixity_check, succession_transfer, and trustee_attestation are the recurring sub-events LIFECYCLE.md stage 8 names. reseal is for the rare, explicitly-logged case where a capsule's payload manifest is legitimately regenerated after sealing — see INTEGRITY.md."
+        },
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Free text identifying who or what performed this event, same convention as data/provenance/events.yaml."
+        },
+        "collection": {
+          "type": "string",
+          "description": "Optional. Matches a collections[].name in capsule.yaml when the event concerns one named collection rather than the whole capsule."
+        },
+        "outcome": {
+          "type": "string",
+          "description": "Optional. Free-text result — most relevant for fixity_check (e.g. \"pass\", \"checksum mismatch: data/photos/1998-07-04-lakehouse.jpg\")."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional. Any other free-text context worth recording."
+        },
+        "manifest_checksum_before": {
+          "type": "string",
+          "description": "reseal only: the manifest-sha256.txt checksum (of manifest-sha256.txt itself) prior to regeneration."
+        },
+        "manifest_checksum_after": {
+          "type": "string",
+          "description": "reseal only: the manifest-sha256.txt checksum after regeneration."
+        }
+      }
+    }
+  }
+}

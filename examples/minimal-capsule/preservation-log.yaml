@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../../schema/preservation-log.schema.json
+# preservation-log.yaml — see ../../INTEGRITY.md for the field reference.
+#
+# Deliberately NOT listed in manifest-sha256.txt or tagmanifest-sha256.txt —
+# this is the one file in a capsule that's expected to keep changing after
+# sealing. This example capsule is freshly sealed (see capsule.yaml's
+# status.lifecycle_stage) and hasn't been deposited anywhere yet, so this
+# starts empty. See INTEGRITY.md for a worked example of what it looks like
+# once a capsule has a real custodian.
+
+[]
