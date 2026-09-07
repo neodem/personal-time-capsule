@@ -17,8 +17,8 @@ A capsule is a [BagIt](https://www.rfc-editor.org/rfc/rfc8493) bag (see [`STANDA
 ├── capsule.yaml                # this capsule's constitution — see below
 ├── privacy-overrides.yaml      # per-item privacy exceptions — see PRIVACY.md. Frozen at sealing, like capsule.yaml
 ├── preservation-log.yaml       # post-seal event log — see INTEGRITY.md. NOT in either manifest, by design
-├── legal/                      # deed of gift, access-restriction agreement, etc. (Phase 3 templates)
-│   └── ...
+├── legal/                      # deed of gift, access-restriction agreement, etc. (Phase 3)
+│   └── deed-of-gift.md          # see DEED_OF_GIFT.md — checksummed in tagmanifest, frozen at sealing
 └── data/                       # BagIt payload — the actual archival content
     ├── person/                  # human-context layer
     │   ├── biography.md
@@ -42,6 +42,7 @@ Two decisions worth calling out explicitly:
 - **The human-context layer (`data/person/`) *is* payload.** Biography, timeline, people, and places are treated as part of the archival content itself (Principle #6 — the annotations that turn a folder of files into a historical record are as much "the record" as the photos and email are), not as packaging metadata about it. They're checksummed in `manifest-sha256.txt` alongside everything else under `data/`.
 - **The event/provenance log (`data/provenance/`) is also payload**, for the same reason — see [`METADATA.md`](./METADATA.md) (`ROADMAP.md` item 10) for what it records and why.
 - **`preservation-log.yaml` is a tag file too, but a deliberately unprotected one** — the one file in a capsule that's expected to keep changing after sealing, and the only one intentionally excluded from both `manifest-sha256.txt` and `tagmanifest-sha256.txt`. See [`INTEGRITY.md`](./INTEGRITY.md) (`ROADMAP.md` item 11) for why sealing needed an escape hatch like this at all.
+- **`legal/`'s contents are checksummed in `tagmanifest-sha256.txt` and frozen at sealing.** A signed deed of gift or other legal instrument should be tamper-evident the moment it's executed — normally alongside the `custody` decision it formalizes, not something that needs to change afterward. See [`DEED_OF_GIFT.md`](./DEED_OF_GIFT.md) (`ROADMAP.md` item 16).
 
 Collection directory names under `data/` (`photos/`, `email/`, `writing/`, ...) are creator-defined — nothing in the format requires a fixed taxonomy. `capsule.yaml`'s `collections` list is what actually names and describes them.
 
