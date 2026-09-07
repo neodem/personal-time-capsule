@@ -28,18 +28,9 @@
             "import",
             "annotation",
             "screening",
-            "sealing",
-            "encryption",
-            "deposit",
-            "dormant_preservation",
-            "release_trigger",
-            "unlock",
-            "access",
-            "fixity_check",
-            "succession_transfer",
-            "trustee_attestation"
+            "sealing"
           ],
-          "description": "The first 11 values match capsule.yaml's status.lifecycle_stage enum (LIFECYCLE.md's main stages). The last 3 are recurring sub-events named in LIFECYCLE.md stage 8 that aren't stage transitions themselves."
+          "description": "The pre-seal LIFECYCLE.md stages only (1-5). Encryption (stage 6) and everything after it happens after this file is already frozen by sealing, so those event types live in preservation-log.yaml instead — see INTEGRITY.md and ENCRYPTION.md. (Earlier drafts of this schema mistakenly included \"encryption\" here; corrected in ROADMAP.md item 13.)"
         },
         "agent": {
           "type": "string",

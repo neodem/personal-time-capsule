@@ -91,7 +91,7 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ### `encryption`
 
-**Deliberately a stub.** `status` (`planned` / `encrypted` / `none`) and the *shape* of key custody (a `quorum` scheme with `required`-of-`of` trustees) are declared so tooling has something stable to build against, but no algorithm or key-splitting scheme is named yet — that's [`ROADMAP.md`](./ROADMAP.md) item 13 (encryption model), a separate, dedicated design discussion, not something to back into via this file.
+`status` (`planned` / `encrypted` / `none`), `algorithm` (locked to `xchacha20-poly1305`), and `key_custody` (a `quorum` scheme, `slip-0039` as the `splitting_scheme`, and a `trustees` list of bookkeeping-only identity records — never the actual share material) — see [`ENCRYPTION.md`](./ENCRYPTION.md) (`ROADMAP.md` item 13) for why these were chosen and what they don't yet solve. A `collections[]` entry can declare its own full `encryption` override, same convention as `privacy_zone`/`release_policy` — generally necessary whenever a collection has its own `release_policy`, so unlocking one collection doesn't imply unlocking another that happens to share a key.
 
 ### `integrity`
 
@@ -106,8 +106,8 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 - ~~The full **privacy model** (item 12) needs to define how per-item overrides work when a collection-level zone isn't granular enough~~ Resolved — see [`PRIVACY.md`](./PRIVACY.md) and `privacy-overrides.yaml`.
 - The full **access/release model** (item 14) needs to formalize what each `release_policy.type` actually requires (e.g. what confirms an `after_death` trigger — see `ACTORS.md`, executor/estate representative).
 - The full **custody/succession model** (item 15) needs to define what "successor activation" actually looks like procedurally, beyond the chain being declared.
-- The **encryption model** (item 13) is intentionally undecided here; `encryption.key_custody.scheme: quorum` assumes *a* threshold scheme exists but doesn't commit to Shamir's Secret Sharing or any other specific mechanism.
+- ~~The **encryption model** (item 13) is intentionally undecided here~~ Resolved — see [`ENCRYPTION.md`](./ENCRYPTION.md): `xchacha20-poly1305` and `slip-0039`, with collection-level key granularity.
 
 ## Status
 
-Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). What's still open is everything the "Open questions" section above lists — the *semantic* models (items 12–15) that give meaning to the vocabulary this document fixes. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.
+Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). What's still open is everything the "Open questions" section above still lists unstruck — the *semantic* models (items 14–15) that give meaning to the vocabulary this document fixes. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.

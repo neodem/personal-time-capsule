@@ -33,7 +33,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 - Someone — a curious family member, a custodian's employee, a hacker, a future custodian who didn't inherit the original release terms — reads capsule content before its release condition is met.
 - This includes technically-authorized-but-not-intended access: a custodian who can technically decrypt because of how keys were managed, even though the design intent was that they couldn't.
 
-*Mitigation direction:* Principle #8 — preservation and access are separate. A custodian should be able to verify and replicate a capsule without holding decryption capability at all, or only holding a share of it (e.g. via key-splitting among multiple trustees) so no single party can unlock early alone.
+*Mitigation direction:* Principle #8 — preservation and access are separate. A custodian should be able to verify and replicate a capsule without holding decryption capability at all, or only holding a share of it (e.g. via key-splitting among multiple trustees) so no single party can unlock early alone. See `ENCRYPTION.md` for the actual algorithm (XChaCha20-Poly1305) and splitting scheme (SLIP-0039).
 
 ## 5. Unauthorized modification or forgery
 
@@ -48,7 +48,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 - A custodian or key-holding trustee is legally compelled (subpoena, court order) or coerced to release early.
 - Coercion aimed the other way: someone pressures a creator to *destroy* material that documents them (e.g. evidence of harm) before it can be preserved.
 
-*Mitigation direction:* this is only partially a technical problem. Multi-party key custody (so no single coerced individual can unlock a capsule alone) helps; the rest is a legal/procedural question for Phase 3 (deed of gift, access restriction agreements) rather than something cryptography alone can solve. Documented explicitly per Principle #9 — we do not claim coercion resistance we can't actually provide.
+*Mitigation direction:* this is only partially a technical problem. Multi-party key custody (so no single coerced individual can unlock a capsule alone — `ENCRYPTION.md`'s SLIP-0039 quorum) helps; the rest is a legal/procedural question for Phase 3 (deed of gift, access restriction agreements) rather than something cryptography alone can solve. Documented explicitly per Principle #9 — we do not claim coercion resistance we can't actually provide.
 
 ## 7. Loss of legitimate access
 
@@ -56,7 +56,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 - A sole key-holding trustee dies, becomes unreachable, or refuses to cooperate at the release trigger.
 - A time-locked or service-dependent encryption scheme depends on a specific external provider that no longer exists when the release date arrives.
 
-*Mitigation direction:* redundant, documented key custody (e.g. secret-sharing across multiple trustees with a defined quorum) instead of a single point of failure; no dependency on any single external service surviving decades (Principle #9).
+*Mitigation direction:* redundant, documented key custody (secret-sharing across multiple trustees with a defined quorum, per `ENCRYPTION.md`) instead of a single point of failure; no dependency on any single external service surviving decades (Principle #9) — notably, no public-key infrastructure or third-party service is part of the encryption design at all.
 
 ## 8. Privacy harm to third parties
 

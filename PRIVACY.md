@@ -78,6 +78,7 @@ Creators and future tooling are free to use other category strings; these six ju
 - **No pattern matching yet.** Exact-path-only entries could get unwieldy for a creator who wants to restrict, say, an entire year of correspondence at once, short of making it its own `collections[]` entry. Worth revisiting once real capsules (Phase 5) show how common that actually is.
 - **Nothing validates that `path` actually exists or belongs to a declared collection.** Same limitation `METADATA.md` already flagged for `data/provenance/events.yaml`'s `collection` field — acceptable for a hand-written file today, worth a `ptc verify` structural check later (Phase 4).
 - **Precedence when a collection-level and item-level policy conflict isn't formally stated**, though the intent above is that item-level always wins when present — should be made explicit and testable once `ROADMAP.md` item 14 (access/release model) defines how `release_policy` is actually evaluated end-to-end.
+- **An item-level `privacy_zone`/`release_policy` override here is not cryptographically enforced.** `ENCRYPTION.md` (item 13) encrypts by collection, not by item — a single item overridden here still shares its collection's encryption key, so its distinct policy is a recorded, procedural intent, not an independent cryptographic guarantee. A creator who needs real isolation for one item should give it its own collection instead. See `ENCRYPTION.md`'s "Encryption granularity" section.
 
 ## Status
 

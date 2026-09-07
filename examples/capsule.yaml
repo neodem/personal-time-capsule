@@ -44,12 +44,54 @@ collections:
     release_policy:
       type: after_death_plus_years
       years: 50
+    # A distinct release_policy from the capsule default (fixed_date
+    # 2076, below) means this collection needs its own encryption
+    # block too — see ../ENCRYPTION.md "Encryption granularity." A
+    # single shared key would mean unlocking this collection at its
+    # trigger also hands trustees the ability to decrypt everything
+    # else that used the same key.
+    encryption:
+      status: planned
+      algorithm: xchacha20-poly1305
+      key_custody:
+        scheme: quorum
+        splitting_scheme: slip-0039
+        quorum:
+          required: 2
+          of: 3
+        trustees:
+          - name: "Priya Smith (daughter)"
+            share_index: 1
+          - name: "Alex Smith (son)"
+            share_index: 2
+          - name: "Riverside Public Library (successor custodian)"
+            share_index: 3
 
   - name: journal
     path: data/journal
     privacy_zone: never-release
     release_policy:
       type: never
+    # "Never" only means something if this collection's key isn't
+    # shared with any collection that IS meant to eventually unlock —
+    # its own encryption block, own quorum, own trustees.
+    encryption:
+      status: planned
+      algorithm: xchacha20-poly1305
+      key_custody:
+        scheme: quorum
+        splitting_scheme: slip-0039
+        quorum:
+          required: 3
+          of: 3
+        trustees:
+          - name: "Priya Smith (daughter)"
+            share_index: 1
+          - name: "Alex Smith (son)"
+            share_index: 2
+          - name: "Family estate attorney"
+            contact: "estate-law@example.org"
+            share_index: 3
 
   - name: person
     path: data/person
@@ -79,17 +121,33 @@ custody:
     - name: "TBD — fallback institution #2"
       type: institution
 
+# Covers every collection that doesn't declare its own `encryption`
+# override above (photos, writing, person, provenance) — all inheriting
+# the capsule-wide default_release_policy (fixed_date, 2076-08-20).
+# See ../ENCRYPTION.md (ROADMAP.md item 13).
 encryption:
-  # STUB — see FORMAT.md. Algorithm/key-splitting scheme are a separate,
-  # not-yet-designed Phase 2 item (encryption model). This section only
-  # fixes the shape of key custody so tooling has something to build against.
   status: planned    # planned | encrypted | none
+  algorithm: xchacha20-poly1305
   key_custody:
     scheme: quorum
+    splitting_scheme: slip-0039
     quorum:
       required: 3
       of: 5
-    trustees: []      # populated at the Encryption & policy binding lifecycle stage
+    trustees:
+      # Bookkeeping only — never the actual SLIP-0039 share material,
+      # which lives with each trustee, outside the capsule entirely.
+      - name: "Priya Smith (daughter)"
+        share_index: 1
+      - name: "Alex Smith (son)"
+        share_index: 2
+      - name: "Sam Smith (spouse)"
+        share_index: 3
+      - name: "Family estate attorney"
+        contact: "estate-law@example.org"
+        share_index: 4
+      - name: "Springfield Historical Society (custodian)"
+        share_index: 5
 
 integrity:
   manifest_algorithm: sha256

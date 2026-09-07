@@ -44,6 +44,22 @@ Per [`PRINCIPLES.md`](./PRINCIPLES.md) #5, the rule is: build on existing, well-
 
 **In plain terms:** SHA-256 is a cryptographic hash function — an algorithm that turns a file of any size into a fixed-length fingerprint such that changing even one byte of the original file produces a completely different fingerprint. Comparing fingerprints is how you prove a file is byte-for-byte identical to what it was at sealing time, without needing to compare the (possibly huge) files directly or trust anyone's word for it.
 
+## XChaCha20-Poly1305 encryption
+
+**Why we depend on it:** Once a capsule has a release policy other than immediate, its content needs to stay unreadable until that condition is met (`PRINCIPLES.md` #8) without depending on any single external service or proprietary tool surviving decades (`PRINCIPLES.md` #9). XChaCha20-Poly1305 is a well-studied, IETF-documented authenticated encryption cipher chosen specifically for its resistance to nonce-reuse mistakes — the most common way real-world implementations of similar ciphers (like AES-GCM) fail catastrophically — which matters for a spec that has to stay correctly implementable by people other than this project's own contributors, for decades.
+
+**What it's used for here:** Every payload file that isn't in an `immediate`-release collection is encrypted in place with a 256-bit XChaCha20-Poly1305 key at the Encryption & policy binding lifecycle stage (`LIFECYCLE.md` stage 6). See [`ENCRYPTION.md`](./ENCRYPTION.md) (`ROADMAP.md` item 13) for the full reasoning, including why it was chosen over AES-256-GCM for this project specifically.
+
+**In plain terms:** XChaCha20-Poly1305 is a modern encryption algorithm that both scrambles content so it can't be read without the right key, and detects tampering automatically — if even one byte of the encrypted data is altered, decryption fails outright rather than silently returning corrupted content.
+
+## SLIP-0039 key splitting
+
+**Why we depend on it:** A single person holding the only copy of a decryption key is both a coercion risk (`THREAT_MODEL.md` #6) and a single point of failure (`THREAT_MODEL.md` #7) — the key custody model needs to split a key across multiple trustees, any threshold of whom can reconstruct it, in a form recoverable without any of this project's own software.
+
+**What it's used for here:** `capsule.yaml`'s `key_custody.splitting_scheme` splits each encryption key via SLIP-0039 (built on Shamir's Secret Sharing) into shares distributed to key-holding trustees (`ACTORS.md`), with a creator-chosen quorum required to reconstruct the key. See [`ENCRYPTION.md`](./ENCRYPTION.md) for why this was chosen over a simpler, unencoded secret-sharing scheme.
+
+**In plain terms:** SLIP-0039 splits a secret into several pieces — encoded as sequences of ordinary words rather than random-looking characters, with a built-in checksum — such that a defined minimum number of pieces (but not fewer) can reconstruct the original secret. It was originally designed so someone could safely back up a cryptocurrency wallet across several trusted people or locations; this project reuses the same mechanism for the same underlying problem (a secret that must survive a long time without any single point of failure), unrelated to cryptocurrency itself.
+
 ## Status
 
-First pass, written during Phase 1 (Definition). This document currently covers the standards the project has already committed to (per the README and `PRINCIPLES.md`); it does not yet cover encryption schemes, key-splitting/secret-sharing approaches, or specific sensitive-data-scanning tooling, since those choices haven't been made — `THREAT_MODEL.md` and `LIFECYCLE.md` describe the *requirements* (e.g. quorum-based key custody) those future choices need to satisfy, but naming specific tools for them is Phase 2/4 work. This document should grow as those choices are made.
+First pass, written during Phase 1 (Definition); updated during Phase 2 once the encryption model (`ROADMAP.md` item 13) settled on XChaCha20-Poly1305 and SLIP-0039. This document does not yet cover specific sensitive-data-scanning tooling, since no `ptc scan` implementation exists — `PRIVACY.md` describes a recommended category vocabulary, but naming actual scanning tools/techniques is Phase 4/5 work. This document should grow as that choice is made.
