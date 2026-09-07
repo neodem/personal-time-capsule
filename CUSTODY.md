@@ -10,12 +10,13 @@ Same reasoning `METADATA.md` and `INTEGRITY.md` already established for `status.
 
 ### What triggers it
 
-Either of two documented events is sufficient:
+Any of three documented events is sufficient:
 
 1. **Explicit notice** — the primary custodian formally notifies the succession chain of incapacity or closure. Unambiguous, immediate.
 2. **A documented unresponsiveness timeout** — the primary fails to complete a defined number of consecutive scheduled check-ins (the same periodic confirmation `ACTORS.md`'s custodian role and `LIFECYCLE.md` stage 8 already call for). A real small institution is arguably more likely to just quietly run out of money than to issue a formal dissolution notice, so relying on explicit notice alone leaves a real gap.
+3. **A documented breach of the Access Restriction Agreement** (`ROADMAP.md` item 17) — the custodian releases content early, or refuses to release it once its recorded trigger has actually fired. Added once `ACCESS_RESTRICTION_AGREEMENT.md` was written: a custodian that won't honor the access terms it agreed to is exactly as unfit to continue holding the capsule as one that's gone bankrupt, and treating a breach as a succession trigger means the remedy doesn't depend on anyone still being around decades later to file a lawsuit — whoever currently has standing (the executor while the estate is open, then successor custodians or trustees themselves afterward) can simply invoke it.
 
-The actual interval and missed-check-in threshold aren't fixed here — that's a number the Phase 3 custodian agreement (`ROADMAP.md` item 18) needs to actually commit to, with real institutions able to reason about what's operationally realistic. This document only establishes that *both* trigger types should be recognized, not what the specific numbers are.
+The actual interval and missed-check-in threshold for trigger 2, and what counts as sufficient documentation for trigger 3, aren't fixed here — those are Phase 3 custodian/access-restriction agreement (`ROADMAP.md` items 17, 18) territory, with real institutions able to reason about what's operationally realistic. This document only establishes that all three trigger types should be recognized, not the specific numbers or evidentiary bar.
 
 ### What activation and transfer actually involve
 
@@ -92,4 +93,4 @@ A fundamentally different problem from custodian succession. A custodian holds a
 
 ## Status
 
-First pass, written during Phase 2 (Specification), addressing [`ROADMAP.md`](./ROADMAP.md) item 15 — the last Phase 2 item. Phase 2 (Specification) is now complete; Phase 3 (Legal) is next. Still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md), especially the reactive-vs-proactive trustee rotation call and the for-cause/no-fault distinction, which haven't been reviewed by anyone with real institutional succession or cryptographic key-management experience.
+First pass, written during Phase 2 (Specification), addressing [`ROADMAP.md`](./ROADMAP.md) item 15 — the last Phase 2 item. Amended during Phase 3 to add breach of the Access Restriction Agreement as a third custodian-succession trigger (`ACCESS_RESTRICTION_AGREEMENT.md`, item 17). Still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md), especially the reactive-vs-proactive trustee rotation call and the for-cause/no-fault distinction, which haven't been reviewed by anyone with real institutional succession or cryptographic key-management experience.

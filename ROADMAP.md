@@ -30,7 +30,7 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 Unlike Phase 2's model documents, "🚧" here specifically means *drafted by non-lawyers, not yet reviewed by a licensed attorney, not usable as-is* — a stronger caveat than Phase 2's "open to challenge." See each document's own warning banner.
 
 16. 🚧 Deed of gift — `DEED_OF_GIFT.md`, `templates/legal/deed-of-gift.md`, `examples/minimal-capsule/legal/deed-of-gift.md` (drafted by non-lawyers; not usable until reviewed by a licensed attorney)
-17. ⬜ Access restriction agreement
+17. 🚧 Access restriction agreement — `ACCESS_RESTRICTION_AGREEMENT.md`, `templates/legal/access-restriction-agreement.md`, `examples/minimal-capsule/legal/access-restriction-agreement.md` (merges the founding conversation's "Access Restriction" and "Posthumous Release" sketches, since `ACCESS.md` already unified those triggers; breach is a new `CUSTODY.md` succession trigger)
 18. ⬜ Custodian agreement
 19. ⬜ Succession instructions
 20. ⬜ Creator instructions
