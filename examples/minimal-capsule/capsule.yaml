@@ -47,10 +47,10 @@ access:
 
 custody:
   primary:
-    name: "TBD — a special collections department or similar institution"
+    name: "Springfield Historical Society"
     type: institution
   successors:
-    - name: "TBD — fallback institution #1"
+    - name: "Riverside Public Library"
       type: institution
 
 encryption:

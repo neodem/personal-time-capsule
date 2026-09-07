@@ -25,9 +25,11 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 14. ✅ Access/release model — `ACCESS.md` (what actually satisfies each `release_policy.type` in `capsule.yaml`, e.g. what confirms an `after_death` trigger)
 15. ✅ Custody/succession model — `CUSTODY.md` (what "successor activation" looks like procedurally)
 
-## Phase 3 — Legal ⬜
+## Phase 3 — Legal 🚧
 
-16. ⬜ Deed of gift
+Unlike Phase 2's model documents, "🚧" here specifically means *drafted by non-lawyers, not yet reviewed by a licensed attorney, not usable as-is* — a stronger caveat than Phase 2's "open to challenge." See each document's own warning banner.
+
+16. 🚧 Deed of gift — `DEED_OF_GIFT.md`, `templates/legal/deed-of-gift.md`, `examples/minimal-capsule/legal/deed-of-gift.md` (drafted by non-lawyers; not usable until reviewed by a licensed attorney)
 17. ⬜ Access restriction agreement
 18. ⬜ Custodian agreement
 19. ⬜ Succession instructions
