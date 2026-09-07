@@ -96,8 +96,8 @@ A capsule can log the same type more than once — e.g. multiple `import` events
 
 ## Open questions
 
-- **This file isn't self-protecting after sealing.** Sealing fixes `manifest-sha256.txt` against the payload as of that moment, but a capsule keeps generating legitimate events afterward (deposit, fixity checks, eventually succession or release). Whether/how the manifest gets re-issued to cover later, legitimate appends — versus treating any post-seal change as suspect by default — is really the integrity model's problem (`ROADMAP.md` item 11), not resolved here.
-- **Fixity-check cadence** (how often, triggered by whom) is exactly what item 11 needs to define; this document just gives fixity checks a place to be logged once that cadence exists.
+- ~~**This file isn't self-protecting after sealing.**~~ Resolved by [`INTEGRITY.md`](./INTEGRITY.md) (`ROADMAP.md` item 11): post-seal events (deposit, fixity checks, succession transfers, release) are recorded in a separate, deliberately unsealed `preservation-log.yaml`, not appended here. `data/provenance/events.yaml` stops growing once a capsule is sealed — it's the *creation* history, not the ongoing one.
+- ~~**Fixity-check cadence**~~ Also resolved by `INTEGRITY.md` — see its "Fixity-check cadence" and "What a failed fixity check should trigger" sections.
 - **Collection cross-references aren't enforced.** `collection` is meant to match a name in `capsule.yaml`'s `collections` list, but nothing (yet) validates that they stay in sync — acceptable for a hand-written file today, worth revisiting if `ptc verify` (Phase 4) starts checking capsules structurally.
 
 ## Status
