@@ -83,7 +83,7 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ### `access`
 
-`default_privacy_zone` (one of `public`, `restricted`, `never-release`, per `PRINCIPLES.md` #7 / `THREAT_MODEL.md` #8 / `LIFECYCLE.md` stage 4) and `default_release_policy`, which every collection inherits unless it overrides. Release policy `type` is one of: `immediate`, `fixed_date`, `after_death`, `after_death_plus_years`, `never`, or `custom` — matching the options `README.md` already commits to. The full semantics of each policy type are [`ROADMAP.md`](./ROADMAP.md) item 14 (access/release model) and aren't fully specified yet; this schema just fixes the vocabulary.
+`default_privacy_zone` (one of `public`, `restricted`, `never-release`, per `PRINCIPLES.md` #7 / `THREAT_MODEL.md` #8 / `LIFECYCLE.md` stage 4) and `default_release_policy`, which every collection inherits unless it overrides. Release policy `type` is one of: `immediate`, `fixed_date`, `after_death`, `after_death_plus_years`, `never`, or `custom` — matching the options `README.md` already commits to. What actually satisfies each type (e.g. what confirms an `after_death` trigger) is [`ACCESS.md`](./ACCESS.md) (`ROADMAP.md` item 14).
 
 ### `custody`
 
@@ -104,10 +104,10 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 ## Open questions
 
 - ~~The full **privacy model** (item 12) needs to define how per-item overrides work when a collection-level zone isn't granular enough~~ Resolved — see [`PRIVACY.md`](./PRIVACY.md) and `privacy-overrides.yaml`.
-- The full **access/release model** (item 14) needs to formalize what each `release_policy.type` actually requires (e.g. what confirms an `after_death` trigger — see `ACTORS.md`, executor/estate representative).
+- ~~The full **access/release model** (item 14) needs to formalize what each `release_policy.type` actually requires~~ Resolved — see [`ACCESS.md`](./ACCESS.md): trustee quorum doubles as trigger confirmation for `after_death`/`after_death_plus_years`, recommending a two-source evidence minimum.
 - The full **custody/succession model** (item 15) needs to define what "successor activation" actually looks like procedurally, beyond the chain being declared.
 - ~~The **encryption model** (item 13) is intentionally undecided here~~ Resolved — see [`ENCRYPTION.md`](./ENCRYPTION.md): `xchacha20-poly1305` and `slip-0039`, with collection-level key granularity.
 
 ## Status
 
-Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). What's still open is everything the "Open questions" section above still lists unstruck — the *semantic* models (items 14–15) that give meaning to the vocabulary this document fixes. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.
+Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). What's still open is everything the "Open questions" section above still lists unstruck — the *semantic* model (item 15, custody/succession) that gives meaning to the remaining vocabulary this document fixes. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.

@@ -48,7 +48,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 - A custodian or key-holding trustee is legally compelled (subpoena, court order) or coerced to release early.
 - Coercion aimed the other way: someone pressures a creator to *destroy* material that documents them (e.g. evidence of harm) before it can be preserved.
 
-*Mitigation direction:* this is only partially a technical problem. Multi-party key custody (so no single coerced individual can unlock a capsule alone — `ENCRYPTION.md`'s SLIP-0039 quorum) helps; the rest is a legal/procedural question for Phase 3 (deed of gift, access restriction agreements) rather than something cryptography alone can solve. Documented explicitly per Principle #9 — we do not claim coercion resistance we can't actually provide.
+*Mitigation direction:* this is only partially a technical problem. Multi-party key custody (so no single coerced individual can unlock a capsule alone — `ENCRYPTION.md`'s SLIP-0039 quorum) helps, and `ACCESS.md` has that same quorum double as independent confirmation of an `after_death` trigger, not just a single executor's say-so; the rest is a legal/procedural question for Phase 3 (deed of gift, access restriction agreements) rather than something cryptography alone can solve. Documented explicitly per Principle #9 — we do not claim coercion resistance we can't actually provide.
 
 ## 7. Loss of legitimate access
 
@@ -81,7 +81,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 
 - Future law (e.g. an expanded "right to erasure," inheritance law changes, changes to what a custodian institution is legally permitted to hold) conflicts with a capsule's stated release policy or an institution's ability to honor it.
 
-*Mitigation direction:* mostly a Phase 3 (Legal) concern — document assumptions clearly enough that custodians and successors can reason about conflicts if and when they arise, rather than pretending the policy is immutable.
+*Mitigation direction:* mostly a Phase 3 (Legal) concern — document assumptions clearly enough that custodians and successors can reason about conflicts if and when they arise, rather than pretending the policy is immutable. `ACCESS.md` is explicit that jurisdictional recognition of death, disputed cases, and similar are Phase 3 territory, not something the release-trigger record itself can resolve.
 
 ## Explicit non-goals
 
