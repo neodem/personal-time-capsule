@@ -64,7 +64,7 @@ This Agreement remains binding on Custodian, and on Riverside Public Library or 
 
 ## 8. Incorporation by Reference
 
-This Agreement incorporates by reference this Capsule's own `capsule.yaml`, the Deed of Gift dated 2026-08-30, and the Access Restriction Agreement dated 2026-08-30.
+This Agreement incorporates by reference this Capsule's own `capsule.yaml`, the Deed of Gift dated 2026-08-30, the Access Restriction Agreement dated 2026-08-30, and the Succession Instructions dated 2026-08-30 (see `legal/succession-instructions.md` in this bag).
 
 ## 9. Governing Law
 
