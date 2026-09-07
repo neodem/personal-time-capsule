@@ -26,7 +26,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 - A successor custodian was never designated, or the designated successor has also since collapsed.
 - Institutional memory of the capsule's existence or release policy is lost even if the underlying files survive (e.g. staff turnover, poor internal records).
 
-*Mitigation direction:* an explicit succession chain of fallback custodians is part of the deposit agreement, not an afterthought; capsule metadata is self-describing enough that a *new*, previously uninvolved institution can pick it up cold.
+*Mitigation direction:* an explicit succession chain of fallback custodians is part of the deposit agreement, not an afterthought; capsule metadata is self-describing enough that a *new*, previously uninvolved institution can pick it up cold. See `CUSTODY.md` for what actually triggers succession (explicit notice or a documented unresponsiveness timeout) and what activation involves procedurally — including the honest limit that an exhausted chain has no guaranteed resolution.
 
 ## 4. Unauthorized early access
 
@@ -56,7 +56,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 - A sole key-holding trustee dies, becomes unreachable, or refuses to cooperate at the release trigger.
 - A time-locked or service-dependent encryption scheme depends on a specific external provider that no longer exists when the release date arrives.
 
-*Mitigation direction:* redundant, documented key custody (secret-sharing across multiple trustees with a defined quorum, per `ENCRYPTION.md`) instead of a single point of failure; no dependency on any single external service surviving decades (Principle #9) — notably, no public-key infrastructure or third-party service is part of the encryption design at all.
+*Mitigation direction:* redundant, documented key custody (secret-sharing across multiple trustees with a defined quorum, per `ENCRYPTION.md`) instead of a single point of failure; no dependency on any single external service surviving decades (Principle #9) — notably, no public-key infrastructure or third-party service is part of the encryption design at all. `CUSTODY.md` covers proactively re-splitting the key with an adjusted roster when a trustee is at risk — but only while a live quorum still exists; once quorum is actually lost, there's no recovery path, a mathematical property of the scheme, not a gap this project can close.
 
 ## 8. Privacy harm to third parties
 

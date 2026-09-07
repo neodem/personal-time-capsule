@@ -87,8 +87,8 @@ The capsule sits with its custodian(s), held and periodically fixity-checked (in
 
 - **Actors:** custodian institution(s); auditor/verifier role can run integrity checks at any point without needing access.
 - **Ongoing sub-events, not full stage transitions:**
-  - **Succession event** (`THREAT_MODEL.md` #3): if a custodian can no longer fulfill its role, the capsule (or a verified replica) transfers to the next custodian in the chain, and dormant preservation continues there. This can happen multiple times over a capsule's life and doesn't affect the release policy.
-  - **Trustee attestation**: key-holding trustees periodically confirm they can still produce their key/share when needed. A trustee becoming unreachable is a risk to flag (`THREAT_MODEL.md` #7), potentially triggering a trustee-succession process analogous to custodian succession — the specifics belong to Phase 3.
+  - **Succession event** (`THREAT_MODEL.md` #3): if a custodian can no longer fulfill its role, the capsule (or a verified replica) transfers to the next custodian in the chain, and dormant preservation continues there. This can happen multiple times over a capsule's life and doesn't affect the release policy. See `CUSTODY.md` for what triggers this and what activation involves procedurally.
+  - **Trustee attestation**: key-holding trustees periodically confirm they can still produce their key/share when needed. A trustee becoming unreachable is a risk to flag (`THREAT_MODEL.md` #7), potentially triggering a trustee-succession process analogous to custodian succession — see `CUSTODY.md`, including why this can only happen while a live quorum still exists.
 
 ## 9. Release trigger
 

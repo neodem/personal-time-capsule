@@ -4,7 +4,7 @@ Personal Time Capsule is built in public, on purpose. Per [`PRINCIPLES.md`](./PR
 
 ## Where the project is right now
 
-We're in **Phase 1 (Definition)** moving into **Phase 2 (Specification)** — see [`VISION.md`](./VISION.md) for the roadmap. That means the most valuable contribution right now usually isn't code (there isn't much yet). It's scrutiny of the design documents: [`PRINCIPLES.md`](./PRINCIPLES.md), [`THREAT_MODEL.md`](./THREAT_MODEL.md), [`ACTORS.md`](./ACTORS.md), [`LIFECYCLE.md`](./LIFECYCLE.md), and [`STANDARDS.md`](./STANDARDS.md).
+**Phase 1 (Definition)** and **Phase 2 (Specification)** are both complete; we're moving into **Phase 3 (Legal)** — see [`VISION.md`](./VISION.md) for the roadmap. That means the most valuable contribution right now usually isn't code (there isn't much yet). It's scrutiny of the design documents: [`PRINCIPLES.md`](./PRINCIPLES.md), [`THREAT_MODEL.md`](./THREAT_MODEL.md), [`ACTORS.md`](./ACTORS.md), [`LIFECYCLE.md`](./LIFECYCLE.md), [`STANDARDS.md`](./STANDARDS.md), and the full Phase 2 model set (`FORMAT.md`, `METADATA.md`, `INTEGRITY.md`, `PRIVACY.md`, `ENCRYPTION.md`, `ACCESS.md`, `CUSTODY.md`) — especially `ENCRYPTION.md` and `CUSTODY.md`, which explicitly ask for review by anyone with real cryptographic or institutional-succession experience.
 
 ## The most useful thing you can do: challenge an assumption
 

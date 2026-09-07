@@ -35,7 +35,7 @@
             "trustee_attestation",
             "reseal"
           ],
-          "description": "The first 6 match the post-seal tail of capsule.yaml's status.lifecycle_stage enum (encryption is stage 6, immediately after sealing — see ENCRYPTION.md for why its event belongs here and not in data/provenance/events.yaml). fixity_check, succession_transfer, and trustee_attestation are the recurring sub-events LIFECYCLE.md stage 8 names. reseal is for the rare, explicitly-logged case where a capsule's payload manifest is legitimately regenerated after sealing — see INTEGRITY.md. See ACCESS.md for what actually satisfies a release_trigger event for each release_policy.type, and what a trustworthy one should document."
+          "description": "The first 6 match the post-seal tail of capsule.yaml's status.lifecycle_stage enum (encryption is stage 6, immediately after sealing — see ENCRYPTION.md for why its event belongs here and not in data/provenance/events.yaml). fixity_check, succession_transfer, and trustee_attestation are the recurring sub-events LIFECYCLE.md stage 8 names. reseal is for the rare, explicitly-logged case where a capsule's payload manifest is legitimately regenerated after sealing — see INTEGRITY.md. See ACCESS.md for what actually satisfies a release_trigger event for each release_policy.type, and what a trustworthy one should document. See CUSTODY.md for what succession_transfer (custodian handoff or trustee roster changes) and trustee_attestation should document procedurally."
         },
         "agent": {
           "type": "string",
