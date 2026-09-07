@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/neodem/personal-time-capsule/schema/privacy-overrides.schema.json",
+  "title": "Personal Time Capsule — privacy-overrides.yaml",
+  "description": "Structural schema for a capsule's per-item privacy override list. See ../PRIVACY.md for the field-by-field explanation and rationale. Covers ROADMAP.md item 12 (privacy model) only.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/override" },
+  "$defs": {
+    "override": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exact path to a single payload file, relative to the bag root (e.g. \"data/email/2011-03-02-medical-bill.eml\"). No wildcards or directory matching in this version — see PRIVACY.md's open questions."
+        },
+        "privacy_zone": {
+          "type": "string",
+          "enum": ["public", "restricted", "never-release"],
+          "description": "Overrides this item's privacy zone from whatever its collection (or the capsule-wide default) declares. Same vocabulary as capsule.schema.json's privacy_zone."
+        },
+        "release_policy": {
+          "type": "object",
+          "description": "Optional. Overrides this item's release policy independently of its privacy_zone override — e.g. a single item that should release later (or earlier) than the rest of its collection. Same shape as capsule.yaml's release_policy.",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["immediate", "fixed_date", "after_death", "after_death_plus_years", "never", "custom"]
+            },
+            "date": { "type": "string", "format": "date" },
+            "years": { "type": "integer", "minimum": 0 },
+            "description": { "type": "string" }
+          }
+        },
+        "category": {
+          "type": "string",
+          "description": "Optional, free text. Not a closed vocabulary — see PRIVACY.md's recommended starter list (financial, credentials, medical, government-id, third-party-privacy, other) and its rationale for staying open rather than enforced."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Optional. Free-text explanation of why this item is overridden."
+        },
+        "flagged_by": {
+          "type": "string",
+          "description": "Optional. Free text: who or what identified the need for this override, e.g. \"Jane Smith (creator)\" or \"ptc scan v0.1 (creator-confirmed)\". Same convention as data/provenance/events.yaml's agent field."
+        }
+      }
+    }
+  }
+}

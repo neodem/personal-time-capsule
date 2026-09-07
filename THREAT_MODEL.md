@@ -63,7 +63,7 @@ Threats below are grouped by category, not by severity or likelihood — a capsu
 - A capsule contains identifying or sensitive material about people *other than* the creator (correspondents, family members, people photographed) who never consented to being archived, and who may still be alive when the capsule is released.
 - Sensitive material left in inadvertently — SSNs, financial account numbers, credentials, medical details — either about the creator or third parties.
 
-*Mitigation direction:* sensitive-data scanning and redaction tooling, and privacy zones (public / restricted / never-release) as a core feature (Principle #7), not something bolted on later. This is a threat the *creator* needs help seeing, not just a threat from outside attackers.
+*Mitigation direction:* sensitive-data scanning and redaction tooling, and privacy zones (public / restricted / never-release) as a core feature (Principle #7), not something bolted on later. This is a threat the *creator* needs help seeing, not just a threat from outside attackers. See `PRIVACY.md` for per-item overrides and a recommended (not enforced) starter vocabulary for scan categories.
 
 ## 9. Insider threat at a custodian institution
 

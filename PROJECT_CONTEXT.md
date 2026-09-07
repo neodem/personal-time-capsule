@@ -12,7 +12,7 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 
 - **Phase**: Phase 2 (Specification), per [`ROADMAP.md`](./ROADMAP.md) — the canonical, numbered, status-tracked list of everything left to do across all five phases. Read that file, not this section, for current progress; this section is deliberately not a duplicate of it.
 - Phase 1 (Definition) is fully done: `README.md`, `VISION.md`, `PRINCIPLES.md`, `THREAT_MODEL.md`, `ACTORS.md`, `LIFECYCLE.md`, `STANDARDS.md` are all on `main`.
-- Phase 2 items 7–11 are done: `FORMAT.md`, `schema/capsule.schema.json`, a real validated example bag at `examples/minimal-capsule/`, `CREATOR_GUIDE.md` (plain-language guide for a non-technical creator, item 9), `METADATA.md`/`schema/events.schema.json` (the PREMIS-aligned event/provenance log, `data/provenance/events.yaml`, item 10), and `INTEGRITY.md`/`schema/preservation-log.schema.json` (fixity cadence, failed-check response, the post-seal `preservation-log.yaml`, item 11). Items 12–15 (privacy/encryption/access/custody models) are not started — check `ROADMAP.md` directly, this section lags merges.
+- Phase 2 items 7–12 are done: `FORMAT.md`, `schema/capsule.schema.json`, a real validated example bag at `examples/minimal-capsule/`, `CREATOR_GUIDE.md` (plain-language guide for a non-technical creator, item 9), `METADATA.md`/`schema/events.schema.json` (the PREMIS-aligned event/provenance log, `data/provenance/events.yaml`, item 10), `INTEGRITY.md`/`schema/preservation-log.schema.json` (fixity cadence, failed-check response, the post-seal `preservation-log.yaml`, item 11), and `PRIVACY.md`/`schema/privacy-overrides.schema.json` (per-item privacy overrides, `privacy-overrides.yaml`, item 12). Items 13–15 (encryption/access/custody models) are not started — check `ROADMAP.md` directly, this section lags merges.
 - Licensing is decided: Apache-2.0 for code/tooling (`LICENSE`), CC BY 4.0 for the specification/docs (`LICENSE-SPEC.md`) — no longer TBD.
 - `CONTRIBUTING.md` and a "challenge an assumption" GitHub issue template exist, giving Principle #10 (build in public, invite disagreement) an actual mechanism.
 - An experimental Rust CLI prototype exists at `cli/` (`ptc init` only, non-interactive) — Phase 4 work started early/for-fun, out of the normal roadmap order (ROADMAP item 21). See `cli/README.md`, including a documented Windows GNU-toolchain build gotcha.
@@ -24,7 +24,7 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 - Build on **BagIt** (packaging), **PREMIS** (preservation metadata), **OAIS/ISO 14721** (reference model), **LOCKSS** philosophy, and **SHA-256** (integrity) — do not reinvent these. See `STANDARDS.md` for why each one and what it's used for.
 - A capsule **is a BagIt bag**. `capsule.yaml` is a root-level BagIt *tag file* (checksummed via `tagmanifest-sha256.txt`), not payload — see `FORMAT.md`.
 - The **human-context layer is payload**, not metadata-about-metadata: `data/person/` (biography, timeline, people, places) lives under `data/` and is checksummed in `manifest-sha256.txt` alongside photos/email/etc., per Principle #6.
-- Privacy zone and release policy are declared **capsule-wide by default, with optional per-named-collection overrides** in `capsule.yaml`. Per-item granularity, if ever needed, is deferred to a separate manifest — `capsule.yaml` stays a bounded, readable file.
+- Privacy zone and release policy are declared **capsule-wide by default, with optional per-named-collection overrides** in `capsule.yaml`, and optional per-item overrides in a separate, sparse `privacy-overrides.yaml` (a tag file, frozen at sealing like `capsule.yaml`) for the rare item that needs to differ from its own collection. `capsule.yaml` stays a bounded, readable file — see `PRIVACY.md`.
 - **Encryption is deliberately unspecified so far.** `capsule.yaml`'s `encryption` section only declares the shape of key custody (a quorum scheme); no algorithm or key-splitting mechanism (e.g. Shamir's Secret Sharing) is committed to yet — that's ROADMAP item 13, a dedicated future decision.
 - **Preservation and access are separate** — an institution can hold/verify/replicate a capsule while being cryptographically unable to read it before a release condition is met.
 - Release policy is **configurable per collection** (e.g., photos vs. email vs. private journal can each have different lock periods), not one global unlock date.
@@ -32,7 +32,7 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 - **Preserve the mess** — raw/unedited material is welcome; curation is additive, never required.
 - **Metadata is event/batch-granularity, not per-file.** `data/provenance/events.yaml` (payload, like `data/person/`) logs the capsule's *pre-seal* history — origination, imports, annotation, screening, sealing — with free-text provenance on import events. Deliberately no PREMIS Object record per payload file; that's redundant with the BagIt manifest and works against Principle #6. See `METADATA.md`.
 - **Post-seal history lives in a second, deliberately unsealed file.** `preservation-log.yaml` (bag root, NOT in `manifest-sha256.txt` or `tagmanifest-sha256.txt`) logs everything that happens after sealing — deposit, fixity checks, succession transfers, release/unlock/access — because appending to a checksummed file after the checksum was committed to would break what "sealed" means. Recommended fixity-check cadence: at least annually, plus after any custody transfer. See `INTEGRITY.md`.
-- Privacy tooling (sensitive-data scanning, redaction, privacy zones: public/restricted/never-release) is core, not an add-on.
+- Privacy tooling (sensitive-data scanning, redaction, privacy zones: public/restricted/never-release) is core, not an add-on. `PRIVACY.md` recommends an open (not enforced) starter vocabulary for scan categories — financial, credentials, medical, government-id, third-party-privacy, other.
 
 ## Working style / workflow preferences
 
@@ -45,9 +45,9 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 
 ## Suggested first task for a new session
 
-Continue Phase 2 per `ROADMAP.md` items 12–15. The most natural next pieces, since `FORMAT.md`'s "Open questions" section already flags them as gaps in the current `capsule.yaml` draft:
+Continue Phase 2 per `ROADMAP.md` items 13–15:
 
-- **Privacy model** (item 12) — how per-item overrides work when a collection-level zone isn't granular enough
+- **Encryption model** (item 13) — algorithm and key-splitting scheme, deliberately left unstubbed in `capsule.yaml`'s `encryption` section
 - **Access/release model** (item 14) — what actually satisfies each `release_policy.type` (e.g. what confirms an `after_death` trigger)
 - **Custody/succession model** (item 15) — what "successor activation" looks like procedurally, and who's authorized to append to `preservation-log.yaml` (flagged as an open question in `INTEGRITY.md`)
 

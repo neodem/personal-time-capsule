@@ -15,6 +15,7 @@ A capsule is a [BagIt](https://www.rfc-editor.org/rfc/rfc8493) bag (see [`STANDA
 ├── manifest-sha256.txt        # BagIt required: checksums of everything under data/
 ├── tagmanifest-sha256.txt     # checksums of the tag files below (capsule.yaml, bag-info.txt, ...)
 ├── capsule.yaml                # this capsule's constitution — see below
+├── privacy-overrides.yaml      # per-item privacy exceptions — see PRIVACY.md. Frozen at sealing, like capsule.yaml
 ├── preservation-log.yaml       # post-seal event log — see INTEGRITY.md. NOT in either manifest, by design
 ├── legal/                      # deed of gift, access-restriction agreement, etc. (Phase 3 templates)
 │   └── ...
@@ -37,6 +38,7 @@ A capsule is a [BagIt](https://www.rfc-editor.org/rfc/rfc8493) bag (see [`STANDA
 Two decisions worth calling out explicitly:
 
 - **`capsule.yaml` is a tag file, not payload.** It lives at the bag root, alongside `bagit.txt`, and is checksummed via `tagmanifest-sha256.txt` rather than `manifest-sha256.txt`. It describes and governs the capsule; it isn't itself part of the historical record.
+- **`privacy-overrides.yaml` is a tag file too, checksummed and frozen at sealing just like `capsule.yaml`.** Privacy screening (`LIFECYCLE.md` stage 4) happens before sealing, so — unlike `preservation-log.yaml` below — there's no ongoing-mutation problem to solve here. See [`PRIVACY.md`](./PRIVACY.md) (`ROADMAP.md` item 12) for what it records and why it's sparse by design.
 - **The human-context layer (`data/person/`) *is* payload.** Biography, timeline, people, and places are treated as part of the archival content itself (Principle #6 — the annotations that turn a folder of files into a historical record are as much "the record" as the photos and email are), not as packaging metadata about it. They're checksummed in `manifest-sha256.txt` alongside everything else under `data/`.
 - **The event/provenance log (`data/provenance/`) is also payload**, for the same reason — see [`METADATA.md`](./METADATA.md) (`ROADMAP.md` item 10) for what it records and why.
 - **`preservation-log.yaml` is a tag file too, but a deliberately unprotected one** — the one file in a capsule that's expected to keep changing after sealing, and the only one intentionally excluded from both `manifest-sha256.txt` and `tagmanifest-sha256.txt`. See [`INTEGRITY.md`](./INTEGRITY.md) (`ROADMAP.md` item 11) for why sealing needed an escape hatch like this at all.
@@ -77,7 +79,7 @@ A free-text description of what this particular capsule is. Optional but encoura
 
 ### `collections`
 
-Named groupings of payload content under `data/`. Each collection has a `name` and a `path`, and *optionally* a `privacy_zone` and `release_policy` that override the capsule-wide defaults declared in `access` below. A collection that omits either field simply inherits the default — this keeps `capsule.yaml` a bounded, human-readable file rather than an exhaustive per-item ledger (per-item detail, if a capsule ever needs it, belongs in a separate per-collection manifest, not here).
+Named groupings of payload content under `data/`. Each collection has a `name` and a `path`, and *optionally* a `privacy_zone` and `release_policy` that override the capsule-wide defaults declared in `access` below. A collection that omits either field simply inherits the default — this keeps `capsule.yaml` a bounded, human-readable file rather than an exhaustive per-item ledger. Finer-than-collection overrides (a single restricted item in an otherwise-public collection) belong in `privacy-overrides.yaml`, not here — see [`PRIVACY.md`](./PRIVACY.md) (`ROADMAP.md` item 12).
 
 ### `access`
 
@@ -101,7 +103,7 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ## Open questions
 
-- The full **privacy model** ([`ROADMAP.md`](./ROADMAP.md) item 12) needs to define how per-item overrides work when a collection-level zone isn't granular enough (e.g. one restricted email in an otherwise-public collection).
+- ~~The full **privacy model** (item 12) needs to define how per-item overrides work when a collection-level zone isn't granular enough~~ Resolved — see [`PRIVACY.md`](./PRIVACY.md) and `privacy-overrides.yaml`.
 - The full **access/release model** (item 14) needs to formalize what each `release_policy.type` actually requires (e.g. what confirms an `after_death` trigger — see `ACTORS.md`, executor/estate representative).
 - The full **custody/succession model** (item 15) needs to define what "successor activation" actually looks like procedurally, beyond the chain being declared.
 - The **encryption model** (item 13) is intentionally undecided here; `encryption.key_custody.scheme: quorum` assumes *a* threshold scheme exists but doesn't commit to Shamir's Secret Sharing or any other specific mechanism.
