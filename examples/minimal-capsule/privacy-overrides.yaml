@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../../schema/privacy-overrides.schema.json
+# privacy-overrides.yaml — see ../../PRIVACY.md for the field reference.
+#
+# A tag file, checksummed in tagmanifest-sha256.txt and frozen at sealing,
+# like capsule.yaml. This example capsule's single email
+# (data/email/2019-07-14-family-reunion.eml) is adequately covered by its
+# collection-level privacy_zone/release_policy in capsule.yaml, so no
+# per-item exception is needed here. See PRIVACY.md for a worked example
+# of what a filled-in override list looks like.
+
+[]
