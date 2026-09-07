@@ -92,7 +92,7 @@ The capsule sits with its custodian(s), held and periodically fixity-checked (in
 
 ## 9. Release trigger
 
-The condition specified in the release policy is met — a calendar date arrives, a death is confirmed (per whatever process the executor/estate representative role formalizes), or another documented condition fires.
+The condition specified in the release policy is met — a calendar date arrives, a death is confirmed (per whatever process the executor/estate representative role formalizes), or another documented condition fires. See `ACCESS.md` for what actually satisfies each `release_policy.type`.
 
 - **Actors:** whoever the policy names as responsible for confirming the trigger (custodian, executor, trustees themselves).
 - **Exit condition:** trigger is confirmed and documented; unlock can proceed.

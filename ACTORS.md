@@ -51,7 +51,7 @@ A custodian institution designated as a fallback if the primary custodian collap
 
 Whoever holds a decryption key, or a share of one (e.g. via secret-sharing across multiple trustees), for a capsule with a time- or condition-locked release policy. May be a person (family friend, executor, lawyer), an institution, or the custodian itself, depending on what the creator chooses.
 
-- **Can:** hold their key or key-share securely; participate in reconstructing the decryption capability once the release condition and quorum requirements (if any) are met; confirm their continued ability to do so, periodically, to the creator or custodian.
+- **Can:** hold their key or key-share securely; participate in reconstructing the decryption capability once the release condition and quorum requirements (if any) are met; confirm their continued ability to do so, periodically, to the creator or custodian. For a death-triggered policy, expected to independently satisfy themselves the condition is genuinely met before contributing their share, not merely act on an executor's say-so — see `ACCESS.md`.
 - **Can't:** unlock a capsule alone if the policy requires a quorum of multiple trustees (this is the main defense against both coercion and a single point of failure — see `THREAT_MODEL.md` #6 and #7); unlock early regardless of quorum, since the release condition itself (date, event) still has to be satisfied.
 
 ## Executor / estate representative
@@ -59,7 +59,7 @@ Whoever holds a decryption key, or a share of one (e.g. via secret-sharing acros
 The legally recognized person handling a creator's affairs after death, per the creator's will or applicable law. Relevant mainly for release policies triggered by death.
 
 - **Can:** confirm the triggering event (the creator's death) to custodians and trustees, per whatever legal process Phase 3 defines; carry out instructions the creator left regarding the capsule.
-- **Can't:** override the creator's stated release policy just because they're now handling the estate — the capsule's terms were the creator's decision (Principle #2), not the executor's to renegotiate, unless the creator explicitly delegated that discretion.
+- **Can't:** override the creator's stated release policy just because they're now handling the estate — the capsule's terms were the creator's decision (Principle #2), not the executor's to renegotiate, unless the creator explicitly delegated that discretion; unilaterally trigger unlock — their confirmation starts the process, but per `ACCESS.md` it's the trustee quorum, not the executor alone, that actually has to be satisfied.
 
 ## Auditor / verifier
 
