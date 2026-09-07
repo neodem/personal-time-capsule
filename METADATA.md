@@ -52,15 +52,13 @@ Each entry is an object:
 
 ### Event types
 
-The first 11 match `capsule.yaml`'s `status.lifecycle_stage` enum one-for-one — the same vocabulary describing "where a capsule is" also describes "what happened," which is deliberate:
+Only the **pre-seal** `LIFECYCLE.md` stages (1-5), matching the corresponding values of `capsule.yaml`'s `status.lifecycle_stage` enum:
 
-`origination`, `import`, `annotation`, `screening`, `sealing`, `encryption`, `deposit`, `dormant_preservation`, `release_trigger`, `unlock`, `access`
+`origination`, `import`, `annotation`, `screening`, `sealing`
 
-Three more cover the recurring sub-events `LIFECYCLE.md` stage 8 names, which aren't stage transitions themselves:
+**Correction:** an earlier draft of this schema also listed `encryption` here. That was wrong: encryption is `LIFECYCLE.md` stage 6, which happens *after* sealing (stage 5) — by the time an encryption event exists to log, this file is already frozen. Writing [`ENCRYPTION.md`](./ENCRYPTION.md) (`ROADMAP.md` item 13) surfaced the inconsistency; `encryption` and the rest of the post-seal stages belong in `preservation-log.yaml` instead — see [`INTEGRITY.md`](./INTEGRITY.md).
 
-`fixity_check`, `succession_transfer`, `trustee_attestation`
-
-A capsule can log the same type more than once — e.g. multiple `import` events over years, as the amend loop (`LIFECYCLE.md`) is used, or repeated `fixity_check` events throughout dormant preservation. `capsule.yaml`'s `status.lifecycle_stage` should be updated to match whenever a new stage-level event (the first 11 types) is logged; the log is the history, the status field is the current position.
+A capsule can log the same type more than once — e.g. multiple `import` events over years, as the amend loop (`LIFECYCLE.md`) is used. `capsule.yaml`'s `status.lifecycle_stage` should be updated to match whenever a new stage-level event is logged (here for stages 1-5, in `preservation-log.yaml` for stage 6 onward); the logs are the history, the status field is the current position.
 
 ### Worked example
 

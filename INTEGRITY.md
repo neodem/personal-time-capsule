@@ -39,7 +39,7 @@ Same shape as `data/provenance/events.yaml` (see `METADATA.md`), with two additi
 
 ### Event types
 
-`deposit`, `dormant_preservation`, `release_trigger`, `unlock`, `access` — the post-seal tail of `capsule.yaml`'s `status.lifecycle_stage` enum, same convention `METADATA.md` established for the pre-seal types in `events.yaml`.
+`encryption`, `deposit`, `dormant_preservation`, `release_trigger`, `unlock`, `access` — the post-seal tail of `capsule.yaml`'s `status.lifecycle_stage` enum, same convention `METADATA.md` established for the pre-seal types in `events.yaml`. `encryption` (`LIFECYCLE.md` stage 6) belongs here, not in `events.yaml`, precisely because it happens *after* sealing (stage 5) — see [`ENCRYPTION.md`](./ENCRYPTION.md) (`ROADMAP.md` item 13), which is what caught this originally being misplaced.
 
 `fixity_check`, `succession_transfer`, `trustee_attestation` — the recurring sub-events `LIFECYCLE.md` stage 8 names.
 
@@ -49,6 +49,12 @@ Same shape as `data/provenance/events.yaml` (see `METADATA.md`), with two additi
 
 ```yaml
 # preservation-log.yaml
+- date: "2026-09-15"
+  type: encryption
+  agent: "Jane Smith (creator); ptc encrypt v0.1"
+  collection: email
+  note: "XChaCha20-Poly1305, 3-of-5 SLIP-0039 quorum — see ENCRYPTION.md"
+
 - date: "2026-10-01"
   type: deposit
   agent: "Springfield Historical Society"

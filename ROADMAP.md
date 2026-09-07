@@ -21,7 +21,7 @@ Status legend: ✅ done · 🚧 draft / in progress · ⬜ not started
 10. ✅ Metadata model — `METADATA.md`, `schema/events.schema.json`, `examples/minimal-capsule/data/provenance/events.yaml` (PREMIS-aligned object/event/provenance fields — see `STANDARDS.md`)
 11. ✅ Integrity model — `INTEGRITY.md`, `schema/preservation-log.schema.json`, `examples/minimal-capsule/preservation-log.yaml` (beyond `capsule.yaml`'s `manifest_algorithm` field — fixity-check cadence, what a failed check triggers)
 12. ✅ Privacy model — `PRIVACY.md`, `schema/privacy-overrides.schema.json`, `examples/minimal-capsule/privacy-overrides.yaml` (per-item overrides when a collection-level zone isn't granular enough; sensitive-data-scanning categories)
-13. ⬜ Encryption model (algorithm, key-splitting scheme — deliberately left unstubbed in `capsule.yaml`, see `FORMAT.md`)
+13. ✅ Encryption model — `ENCRYPTION.md` (XChaCha20-Poly1305, SLIP-0039 key splitting, collection-level granularity; algorithm/scheme were deliberately left unstubbed in `capsule.yaml`, see `FORMAT.md`)
 14. ⬜ Access/release model (what actually satisfies each `release_policy.type` in `capsule.yaml`, e.g. what confirms an `after_death` trigger)
 15. ⬜ Custody/succession model (what "successor activation" looks like procedurally)
 

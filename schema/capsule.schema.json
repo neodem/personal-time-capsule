@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/neodem/personal-time-capsule/schema/capsule.schema.json",
   "title": "Personal Time Capsule — capsule.yaml",
-  "description": "Structural schema for a capsule's root tag file. See ../FORMAT.md for the field-by-field explanation and rationale. This schema covers ROADMAP.md items 7-8 (structure) only — it deliberately does not encode the deeper semantics of privacy zones, release policies, custody, or encryption, which are separate, not-yet-written model documents (ROADMAP.md items 12-15).",
+  "description": "Structural schema for a capsule's root tag file. See ../FORMAT.md for the field-by-field explanation and rationale. This schema covers ROADMAP.md items 7-8 (structure), 12 (privacy — see ../PRIVACY.md), and 13 (encryption — see ../ENCRYPTION.md). It deliberately does not encode the deeper semantics of access/release triggers (item 14) or custody/succession (item 15), still separate, not-yet-written model documents.",
   "type": "object",
   "required": ["capsule", "access", "integrity", "status"],
   "additionalProperties": false,
@@ -74,41 +74,7 @@
         }
       }
     },
-    "encryption": {
-      "type": "object",
-      "description": "Deliberately a stub — see ROADMAP.md item 13. Declares the shape of key custody only; no algorithm or key-splitting mechanism is fixed by this schema.",
-      "required": ["status"],
-      "additionalProperties": false,
-      "properties": {
-        "status": {
-          "type": "string",
-          "enum": ["planned", "encrypted", "none"]
-        },
-        "key_custody": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "scheme": {
-              "type": "string",
-              "description": "Currently only \"quorum\" is used in practice; left as a free string since the encryption model (item 13) may introduce others."
-            },
-            "quorum": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "required": { "type": "integer", "minimum": 1 },
-                "of": { "type": "integer", "minimum": 1 }
-              }
-            },
-            "trustees": {
-              "type": "array",
-              "description": "Trustee identity structure isn't designed yet (items 13/15) — intentionally unconstrained.",
-              "items": true
-            }
-          }
-        }
-      }
-    },
+    "encryption": { "$ref": "#/$defs/encryption" },
     "integrity": {
       "type": "object",
       "required": ["manifest_algorithm"],
@@ -199,7 +165,70 @@
         "name": { "type": "string", "minLength": 1 },
         "path": { "type": "string", "minLength": 1 },
         "privacy_zone": { "$ref": "#/$defs/privacy_zone" },
-        "release_policy": { "$ref": "#/$defs/release_policy" }
+        "release_policy": { "$ref": "#/$defs/release_policy" },
+        "encryption": {
+          "$ref": "#/$defs/encryption",
+          "description": "Optional. Overrides the capsule-wide encryption block for this collection — a full replacement, not a merge, same convention as privacy_zone/release_policy overrides. See ENCRYPTION.md's \"Encryption granularity\" section for why a collection with its own release_policy generally needs its own key and trustee quorum too."
+        }
+      }
+    },
+    "encryption": {
+      "type": "object",
+      "description": "See ENCRYPTION.md (ROADMAP.md item 13). Public/immediate-release content is never encrypted; anything else gets XChaCha20-Poly1305 payload encryption with a SLIP-0039-split key.",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["planned", "encrypted", "none"]
+        },
+        "algorithm": {
+          "type": "string",
+          "enum": ["xchacha20-poly1305"],
+          "description": "Required once status is \"planned\" or \"encrypted\". Locked to one vetted default rather than offering creator-selectable crypto-agility — see ENCRYPTION.md."
+        },
+        "key_custody": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "scheme": {
+              "type": "string",
+              "description": "Currently only \"quorum\" is used in practice; left as a free string in case a future revision introduces others."
+            },
+            "splitting_scheme": {
+              "type": "string",
+              "enum": ["slip-0039"],
+              "description": "The secret-sharing mechanism splitting the encryption key across trustees. See ENCRYPTION.md."
+            },
+            "quorum": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "required": { "type": "integer", "minimum": 1 },
+                "of": { "type": "integer", "minimum": 1 }
+              }
+            },
+            "trustees": {
+              "type": "array",
+              "description": "Bookkeeping only — never the actual share material. See ENCRYPTION.md.",
+              "items": { "$ref": "#/$defs/trustee" }
+            }
+          }
+        }
+      }
+    },
+    "trustee": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "contact": { "type": "string" },
+        "share_index": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Which numbered share (of key_custody.quorum.of) this trustee holds, for bookkeeping only — not a substitute for the trustee independently confirming their own share."
+        }
       }
     },
     "custodian": {
