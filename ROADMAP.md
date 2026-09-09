@@ -35,15 +35,16 @@ Unlike Phase 2's model documents, "🚧" here specifically means *drafted by non
 19. 🚧 Succession instructions — `SUCCESSION_INSTRUCTIONS.md`, `templates/legal/succession-instructions.md` + `certificate-of-succession.md` + `trustee-acceptance.md`, `examples/minimal-capsule/legal/succession-instructions.md` (gets every named successor custodian to pre-commit at deposit, rather than merely being named)
 20. ✅ Creator instructions — `templates/legal/creator-instructions.md`, `examples/minimal-capsule/legal/creator-instructions.md` (a personal worksheet, not a binding agreement — no attorney-review caveat needed, since no institution's obligations depend on it; recommended to keep outside the sealed bag, with the creator's will, since unlike the other four documents it's meant to be updated over time)
 
-## Phase 4 — Software ⬜
+## Phase 4 — Software 🚧
 
-Started early/experimentally (see `cli/`), out of order relative to Phases 2–3 — non-authoritative until the spec catches up.
+Started early/experimentally (see `cli/`) — the spec (Phases 2–3) has since fully caught up, so this is no longer "out of order," but the CLI itself is still an early reference implementation. Building one command at a time, same branch+PR+review pattern as Phases 2–3. See `cli/README.md`'s "Stability" section: the CLI's flags/output/exit-codes are this project's public integration contract, not its internal Rust types.
 
-21. 🚧 `ptc init` — `cli/` (Rust; non-interactive/flags-only first pass, see `cli/README.md`)
+21. 🚧 `ptc init` — `cli/` (Rust; non-interactive/flags-only, now backed by a real `serde` capsule model, see `cli/README.md`)
 22. ⬜ `ptc import`
 23. ⬜ `ptc inspect`
 24. ⬜ `ptc scan`
 25. ⬜ `ptc redact`
+25a. 🚧 `ptc seal` — `cli/` (LIFECYCLE.md stage 5; no command existed for this stage until now, even though `verify`/`encrypt`/`deposit` all assume a manifest already exists — see `cli/README.md`)
 26. ⬜ `ptc encrypt`
 27. ⬜ `ptc verify`
 28. ⬜ `ptc unlock`
