@@ -56,7 +56,7 @@ pub struct Creator {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contact: Option<String>,
     #[serde(flatten)]
-    pub extra: BTreeMap<String, serde_yaml::Value>,
+    pub extra: BTreeMap<String, yaml_serde::Value>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -64,7 +64,7 @@ pub struct Purpose {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(flatten)]
-    pub extra: BTreeMap<String, serde_yaml::Value>,
+    pub extra: BTreeMap<String, yaml_serde::Value>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -134,7 +134,7 @@ pub struct Custodian {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     pub custodian_type: Option<String>,
     #[serde(flatten)]
-    pub extra: BTreeMap<String, serde_yaml::Value>,
+    pub extra: BTreeMap<String, yaml_serde::Value>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -183,7 +183,7 @@ pub struct Trustee {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub share_index: Option<u32>,
     #[serde(flatten)]
-    pub extra: BTreeMap<String, serde_yaml::Value>,
+    pub extra: BTreeMap<String, yaml_serde::Value>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -226,7 +226,7 @@ pub enum LifecycleStage {
 /// structurally malformed file instead of silently accepting it.
 pub fn read_capsule_yaml(path: &Path) -> Result<Capsule> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
-    serde_yaml::from_str(&text)
+    yaml_serde::from_str(&text)
         .with_context(|| format!("parsing {} against the capsule.yaml model", path.display()))
 }
 
@@ -237,7 +237,7 @@ pub fn read_capsule_yaml(path: &Path) -> Result<Capsule> {
 /// any comments a creator added. See `seal.rs` for how `ptc seal` instead
 /// patches a single field in place.
 pub fn write_capsule_yaml(path: &Path, capsule: &Capsule, header_comment: &str) -> Result<()> {
-    let body = serde_yaml::to_string(capsule).context("serializing capsule.yaml")?;
+    let body = yaml_serde::to_string(capsule).context("serializing capsule.yaml")?;
     let body = force_quote_date_like_fields(&body);
     let mut contents = String::with_capacity(header_comment.len() + body.len());
     contents.push_str(header_comment);
@@ -311,8 +311,8 @@ mod tests {
     #[test]
     fn round_trips_through_yaml() {
         let original = minimal_capsule();
-        let yaml = serde_yaml::to_string(&original).expect("serialize");
-        let parsed: Capsule = serde_yaml::from_str(&yaml).expect("deserialize");
+        let yaml = yaml_serde::to_string(&original).expect("serialize");
+        let parsed: Capsule = yaml_serde::from_str(&yaml).expect("deserialize");
         assert_eq!(parsed.capsule.id, original.capsule.id);
         assert_eq!(parsed.access.default_privacy_zone, PrivacyZone::Restricted);
         assert_eq!(
@@ -325,25 +325,25 @@ mod tests {
     #[test]
     fn enum_values_match_schema_strings() {
         assert_eq!(
-            serde_yaml::to_string(&PrivacyZone::NeverRelease)
+            yaml_serde::to_string(&PrivacyZone::NeverRelease)
                 .unwrap()
                 .trim(),
             "never-release"
         );
         assert_eq!(
-            serde_yaml::to_string(&ReleasePolicyType::AfterDeathPlusYears)
+            yaml_serde::to_string(&ReleasePolicyType::AfterDeathPlusYears)
                 .unwrap()
                 .trim(),
             "after_death_plus_years"
         );
         assert_eq!(
-            serde_yaml::to_string(&LifecycleStage::DormantPreservation)
+            yaml_serde::to_string(&LifecycleStage::DormantPreservation)
                 .unwrap()
                 .trim(),
             "dormant_preservation"
         );
         assert_eq!(
-            serde_yaml::to_string(&ManifestAlgorithm::Sha256)
+            yaml_serde::to_string(&ManifestAlgorithm::Sha256)
                 .unwrap()
                 .trim(),
             "sha256"
@@ -405,7 +405,7 @@ status:
   lifecycle_stage: origination
 not_a_real_field: true
 "#;
-        let result: Result<Capsule, _> = serde_yaml::from_str(yaml);
+        let result: Result<Capsule, _> = yaml_serde::from_str(yaml);
         assert!(
             result.is_err(),
             "expected an unknown top-level field to be rejected"

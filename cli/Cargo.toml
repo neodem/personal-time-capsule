@@ -20,10 +20,9 @@ uuid = { version = "1", features = ["v4"] }
 chrono = "0.4"
 anyhow = "1"
 serde = { version = "1", features = ["derive"] }
-# serde_yaml itself is unmaintained; yaml_serde is the maintained fork from
-# The YAML Organization, published as a drop-in replacement -- renaming the
-# dependency here keeps `use serde_yaml` working throughout the crate.
-serde_yaml = { package = "yaml_serde", version = "0.10" }
+# serde_yaml itself is unmaintained (dtolnay archived it); yaml_serde is
+# the maintained fork from The YAML Organization (github.com/yaml).
+yaml_serde = "0.10"
 sha2 = "0.10"
 walkdir = "2"
 
