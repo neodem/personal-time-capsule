@@ -74,6 +74,22 @@ fn init_then_seal_produces_a_verifiable_manifest() {
         String::from_utf8_lossy(&init_output.stderr)
     );
 
+    // ptc init should have scaffolded FORMAT.md's data/person/ layer, not
+    // just the empty directory.
+    let data_person = capsule_path.join("data").join("person");
+    for file in ["biography.md", "timeline.md", "people.yaml", "places.yaml"] {
+        assert!(
+            data_person.join(file).is_file(),
+            "ptc init should have written data/person/{file}"
+        );
+    }
+    assert!(
+        fs::read_to_string(data_person.join("biography.md"))
+            .expect("read biography.md")
+            .contains("Test Creator"),
+        "biography.md's heading should include the --creator-name passed to ptc init"
+    );
+
     let photos_dir = capsule_path.join("data").join("photos");
     fs::create_dir_all(&photos_dir).expect("mkdir data/photos");
     let payload_path = photos_dir.join("note.txt");

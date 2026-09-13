@@ -45,7 +45,7 @@ cargo build
 ptc init <path> [--creator-name NAME] [--creator-contact CONTACT] [--purpose TEXT]
 ```
 
-Scaffolds a new capsule skeleton at `<path>`: `bagit.txt`, an empty `data/person/` directory, and a starter `capsule.yaml`. All flags are optional — omitted fields (per Principle #2, the creator controls what identifying information appears at all) are simply left out of the generated file rather than filled with placeholder junk.
+Scaffolds a new capsule skeleton at `<path>`: `bagit.txt`, a starter `capsule.yaml`, and `data/person/` (`FORMAT.md`'s human-context layer) populated with starter `biography.md`, `timeline.md`, `people.yaml`, and `places.yaml` — not just the empty directory. These are genuinely empty guidance text, not fictional example content (per Principle #2, a creator's own life isn't invented for them) — `--creator-name`, if given, only shows up in `biography.md`'s heading. All flags are optional — omitted fields are simply left out of the generated file rather than filled with placeholder junk.
 
 `access.default_release_policy` is always written as `type: custom` with a `"TBD"` description — `ptc init` has no business inventing a real release policy on a creator's behalf. `ptc seal` (below) refuses to run until that placeholder has been replaced with a real one.
 
