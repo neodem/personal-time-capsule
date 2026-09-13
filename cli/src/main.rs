@@ -2,6 +2,7 @@ use anyhow::{bail, Context, Result};
 use chrono::Utc;
 use clap::{Parser, Subcommand};
 use ptc::import::{import, ImportSummary};
+use ptc::inspect::{inspect, InspectReport};
 use ptc::model::{
     self, Access, Capsule, CapsuleIdentity, Creator, Integrity, LifecycleStage, ManifestAlgorithm,
     PrivacyZone, Purpose, ReleasePolicy, ReleasePolicyType, Status, SPEC_VERSION,
@@ -25,6 +26,9 @@ enum Command {
     /// Copy a file or directory tree into a capsule's data/<collection>/,
     /// registering the collection and logging a provenance event.
     Import(ImportArgs),
+    /// Print a read-only summary of a capsule's current state: collections,
+    /// the human-context layer, provenance, and optional tag files.
+    Inspect(InspectArgs),
     /// Seal a capsule: compute manifest-sha256.txt / tagmanifest-sha256.txt,
     /// write bag-info.txt, and mark status.lifecycle_stage as "sealing".
     Seal(SealArgs),
@@ -82,6 +86,12 @@ struct ImportArgs {
 }
 
 #[derive(clap::Args)]
+struct InspectArgs {
+    /// Path to the capsule directory to inspect.
+    path: PathBuf,
+}
+
+#[derive(clap::Args)]
 struct SealArgs {
     /// Path to the capsule directory to seal. Must already contain a
     /// capsule.yaml (see `ptc init`) with a real release policy set.
@@ -100,6 +110,7 @@ fn run() -> Result<()> {
     match cli.command {
         Command::Init(args) => cmd_init(&args),
         Command::Import(args) => cmd_import(&args),
+        Command::Inspect(args) => cmd_inspect(&args),
         Command::Seal(args) => cmd_seal(&args),
     }
 }
@@ -304,6 +315,193 @@ fn cmd_import(args: &ImportArgs) -> Result<()> {
     println!("Logged an import event in data/provenance/events.yaml.");
 
     Ok(())
+}
+
+fn cmd_inspect(args: &InspectArgs) -> Result<()> {
+    let InspectReport {
+        capsule,
+        collections,
+        undeclared_directories,
+        person_layer,
+        provenance,
+        privacy_overrides_count,
+        legal_files,
+        preservation_log_entries,
+        manifest_present,
+        tagmanifest_present,
+        total_payload_files,
+        total_payload_bytes,
+    } = inspect(&args.path)?;
+
+    println!("Capsule at {}", args.path.display());
+    println!("  id:      {}", capsule.capsule.id);
+    println!("  created: {}", capsule.capsule.created);
+    if let Some(creator) = &capsule.capsule.creator {
+        let name = creator.name.as_deref().unwrap_or("(name not set)");
+        match &creator.contact {
+            Some(contact) => println!("  creator: {name} <{contact}>"),
+            None => println!("  creator: {name}"),
+        }
+    }
+    if let Some(purpose) = capsule
+        .purpose
+        .as_ref()
+        .and_then(|p| p.description.as_ref())
+    {
+        println!("  purpose: {purpose}");
+    }
+    println!(
+        "  stage:   {}",
+        lifecycle_stage_str(capsule.status.lifecycle_stage)
+    );
+
+    println!();
+    println!("Human-context layer (data/person/):");
+    println!(
+        "  biography.md: {}",
+        if person_layer.biography_present {
+            "present"
+        } else {
+            "missing"
+        }
+    );
+    println!(
+        "  timeline.md:  {}",
+        if person_layer.timeline_present {
+            "present"
+        } else {
+            "missing"
+        }
+    );
+    println!(
+        "  people.yaml:  {}",
+        describe_count(person_layer.people_count, "person", "people")
+    );
+    println!(
+        "  places.yaml:  {}",
+        describe_count(person_layer.places_count, "place", "places")
+    );
+
+    println!();
+    println!("Provenance (data/provenance/events.yaml):");
+    match provenance {
+        Some(p) => {
+            print!("  {} event(s) logged", p.event_count);
+            if let Some(recent) = p.most_recent {
+                println!(
+                    "; most recent: {} {} (agent: {})",
+                    recent.date, recent.event_type, recent.agent
+                );
+            } else {
+                println!();
+            }
+        }
+        None => println!("  not present"),
+    }
+
+    if !collections.is_empty() {
+        println!();
+        println!("Collections:");
+        for c in &collections {
+            let existence = if c.exists { "" } else { " [directory missing]" };
+            println!(
+                "  {:<15} {:<20} {} file(s), {} bytes{}",
+                c.name, c.path, c.file_count, c.total_bytes, existence
+            );
+            println!(
+                "    privacy: {}   release: {}",
+                c.privacy_zone, c.release_policy
+            );
+        }
+    }
+
+    if !undeclared_directories.is_empty() {
+        println!();
+        println!("Undeclared directories under data/ (not registered as a collection):");
+        for d in &undeclared_directories {
+            println!(
+                "  {:<15} {} file(s), {} bytes",
+                d.name, d.file_count, d.total_bytes
+            );
+        }
+    }
+
+    println!();
+    println!("Other tag files:");
+    println!(
+        "  privacy-overrides.yaml: {}",
+        describe_count(privacy_overrides_count, "override", "overrides")
+    );
+    match legal_files {
+        Some(files) if !files.is_empty() => {
+            println!(
+                "  legal/:                  {} file(s) ({})",
+                files.len(),
+                files.join(", ")
+            )
+        }
+        Some(_) => println!("  legal/:                  present, empty"),
+        None => println!("  legal/:                  not present"),
+    }
+    println!(
+        "  preservation-log.yaml:   {}",
+        describe_count(preservation_log_entries, "entry", "entries")
+    );
+
+    println!();
+    println!("Sealing:");
+    println!(
+        "  manifest-sha256.txt:    {}",
+        if manifest_present {
+            "present"
+        } else {
+            "not present"
+        }
+    );
+    println!(
+        "  tagmanifest-sha256.txt: {}",
+        if tagmanifest_present {
+            "present"
+        } else {
+            "not present"
+        }
+    );
+
+    println!();
+    println!(
+        "Total payload under data/: {} file(s), {} bytes",
+        total_payload_files, total_payload_bytes
+    );
+
+    Ok(())
+}
+
+/// `capsule.yaml`'s own snake_case vocabulary (matching `FORMAT.md`/
+/// `METADATA.md`), not Rust's `{:?}` variant spelling -- a creator
+/// cross-referencing this output against the file itself shouldn't see
+/// "Import" print here and "import" there for the same thing.
+fn lifecycle_stage_str(stage: LifecycleStage) -> &'static str {
+    match stage {
+        LifecycleStage::Origination => "origination",
+        LifecycleStage::Import => "import",
+        LifecycleStage::Annotation => "annotation",
+        LifecycleStage::Screening => "screening",
+        LifecycleStage::Sealing => "sealing",
+        LifecycleStage::Encryption => "encryption",
+        LifecycleStage::Deposit => "deposit",
+        LifecycleStage::DormantPreservation => "dormant_preservation",
+        LifecycleStage::ReleaseTrigger => "release_trigger",
+        LifecycleStage::Unlock => "unlock",
+        LifecycleStage::Access => "access",
+    }
+}
+
+fn describe_count(count: Option<usize>, singular: &str, plural: &str) -> String {
+    match count {
+        Some(1) => format!("1 {singular}"),
+        Some(n) => format!("{n} {plural}"),
+        None => "not present".to_string(),
+    }
 }
 
 fn cmd_seal(args: &SealArgs) -> Result<()> {

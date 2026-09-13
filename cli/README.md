@@ -1,6 +1,6 @@
 # ptc (reference CLI) — experimental
 
-An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, and `ptc seal` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
+An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, `ptc inspect`, and `ptc seal` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
 
 Written in Rust; licensed [Apache-2.0](../LICENSE) like the rest of this project's code/tooling.
 
@@ -60,6 +60,14 @@ Copies a file or a whole directory tree into `<path>/data/<collection>/` (`LIFEC
 Like `ptc seal`, `capsule.yaml` is patched surgically (a new `collections:` entry, and `status.lifecycle_stage` advanced from `origination` to `import` the first time) rather than re-serialized, so hand-written comments survive.
 
 ```sh
+ptc inspect <path>
+```
+
+A read-only summary of a capsule's current state — no writes, no exit-code gate to satisfy first. Prints: capsule identity and lifecycle stage; whether the `data/person/` human-context layer's four files exist (with entry counts for `people.yaml`/`places.yaml`); `data/provenance/events.yaml`'s event count and most recent entry; each declared collection's actual on-disk file count/size plus its *resolved* privacy zone and release policy (falling back to `capsule.yaml`'s capsule-wide default and saying so, rather than just printing "not set"); any directory under `data/` that isn't `person`/`provenance` or a declared collection (material that landed there without going through `ptc import`); whether `privacy-overrides.yaml`, `legal/`, and `preservation-log.yaml` are present; and whether `manifest-sha256.txt`/`tagmanifest-sha256.txt` exist (their *presence*, not their correctness — verifying checksums against disk is `ptc verify`'s job, `ROADMAP.md` item 27, not built yet).
+
+Sits, per `LIFECYCLE.md`'s command ordering, between `import`/annotation and `scan`/screening: "what's actually in here right now," distinct from integrity verification or sensitive-data scanning. Everything it reads is read leniently (no `deny_unknown_fields`) — a hand-edited or future-schema-extended file shouldn't make a reporting tool itself fail to run; structural validation is `ptc verify`'s job.
+
+```sh
 ptc seal <path>
 ```
 
@@ -76,4 +84,5 @@ Seals a capsule (`LIFECYCLE.md` stage 5, `ROADMAP.md` item 25a — there was no 
 - **Structural, not full JSON Schema, validation.** `ptc init`/`ptc seal` both read and write `capsule.yaml` through real `serde` types (`ptc::model`) that mirror `schema/capsule.schema.json`'s required fields, types, and enum values, with `deny_unknown_fields` rejecting anything the schema wouldn't allow — a real improvement over the original hand-built-string approach, which validated nothing at all. What's still missing: the schema's *conditional* requirements (e.g. `release_policy.date` being required specifically when `type: fixed_date`) aren't enforced by the Rust types alone. A future `ptc verify` running an actual JSON Schema validator against the parsed YAML would be the authoritative check.
 - `ptc seal` doesn't yet handle encrypted collections specially (that's `ptc encrypt`, not built yet) — it hashes whatever is on disk under `data/` at the time it's run.
 - `ptc import` only sets a collection's `name`/`path` when auto-registering it — privacy zone, release policy, and encryption settings are left as the creator's own edit, same as `ptc init` leaving the release policy as a placeholder.
-- No `ptc inspect`, `ptc scan`, `ptc redact`, `ptc encrypt`, `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 23–29).
+- `ptc inspect`'s collection-size and undeclared-directory scans are simple recursive walks with no encryption-awareness -- fine today (nothing is encrypted yet), but will need revisiting once `ptc encrypt` exists.
+- No `ptc scan`, `ptc redact`, `ptc encrypt`, `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 24, 25, 26–29).
