@@ -1,6 +1,6 @@
 # ptc (reference CLI) — experimental
 
-An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init` and `ptc seal` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
+An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, and `ptc seal` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
 
 Written in Rust; licensed [Apache-2.0](../LICENSE) like the rest of this project's code/tooling.
 
@@ -50,6 +50,16 @@ Scaffolds a new capsule skeleton at `<path>`: `bagit.txt`, an empty `data/person
 `access.default_release_policy` is always written as `type: custom` with a `"TBD"` description — `ptc init` has no business inventing a real release policy on a creator's behalf. `ptc seal` (below) refuses to run until that placeholder has been replaced with a real one.
 
 ```sh
+ptc import <path> --source <file-or-dir> --collection NAME [--source-description TEXT] [--agent TEXT]
+```
+
+Copies a file or a whole directory tree (structure preserved) into `<path>/data/<collection>/` (`LIFECYCLE.md` stage 2). If `--collection` isn't already declared in `capsule.yaml`, `ptc import` registers it there (`name`/`path` only — privacy zone, release policy, etc. are left for the creator to add later). Either way, it appends an `import` event to `data/provenance/events.yaml` (`METADATA.md`, `ROADMAP.md` item 10), creating that file with a short header if it doesn't exist yet.
+
+`ptc import` refuses (non-zero exit, clear error, nothing copied) if: the source doesn't exist; any destination file would be overwritten; the destination is inside (or is) the source; or `capsule.yaml`'s `status.lifecycle_stage` is already past the pre-seal amend loop (`sealing` or later) — importing at that point would silently invalidate an existing manifest instead of being caught as tampering, so re-seal after importing if material needs to be added that late.
+
+Like `ptc seal`, `capsule.yaml` is patched surgically (a new `collections:` entry, and `status.lifecycle_stage` advanced from `origination` to `import` the first time) rather than re-serialized, so hand-written comments survive.
+
+```sh
 ptc seal <path>
 ```
 
@@ -65,4 +75,5 @@ Seals a capsule (`LIFECYCLE.md` stage 5, `ROADMAP.md` item 25a — there was no 
 - No `--force` flag to reinitialize `ptc init` into a non-empty directory (intentional, for now — safer default).
 - **Structural, not full JSON Schema, validation.** `ptc init`/`ptc seal` both read and write `capsule.yaml` through real `serde` types (`ptc::model`) that mirror `schema/capsule.schema.json`'s required fields, types, and enum values, with `deny_unknown_fields` rejecting anything the schema wouldn't allow — a real improvement over the original hand-built-string approach, which validated nothing at all. What's still missing: the schema's *conditional* requirements (e.g. `release_policy.date` being required specifically when `type: fixed_date`) aren't enforced by the Rust types alone. A future `ptc verify` running an actual JSON Schema validator against the parsed YAML would be the authoritative check.
 - `ptc seal` doesn't yet handle encrypted collections specially (that's `ptc encrypt`, not built yet) — it hashes whatever is on disk under `data/` at the time it's run.
-- No `ptc import`, `ptc inspect`, `ptc scan`, `ptc redact`, `ptc encrypt`, `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 22–29).
+- `ptc import` only sets a collection's `name`/`path` when auto-registering it — privacy zone, release policy, and encryption settings are left as the creator's own edit, same as `ptc init` leaving the release policy as a placeholder.
+- No `ptc inspect`, `ptc scan`, `ptc redact`, `ptc encrypt`, `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 23–29).

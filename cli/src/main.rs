@@ -1,6 +1,7 @@
 use anyhow::{bail, Context, Result};
 use chrono::Utc;
 use clap::{Parser, Subcommand};
+use ptc::import::{import, ImportSummary};
 use ptc::model::{
     self, Access, Capsule, CapsuleIdentity, Creator, Integrity, LifecycleStage, ManifestAlgorithm,
     PrivacyZone, Purpose, ReleasePolicy, ReleasePolicyType, Status, SPEC_VERSION,
@@ -21,6 +22,9 @@ struct Cli {
 enum Command {
     /// Scaffold a new, empty capsule at the given path.
     Init(InitArgs),
+    /// Copy a file or directory tree into a capsule's data/<collection>/,
+    /// registering the collection and logging a provenance event.
+    Import(ImportArgs),
     /// Seal a capsule: compute manifest-sha256.txt / tagmanifest-sha256.txt,
     /// write bag-info.txt, and mark status.lifecycle_stage as "sealing".
     Seal(SealArgs),
@@ -47,6 +51,34 @@ struct InitArgs {
 }
 
 #[derive(clap::Args)]
+struct ImportArgs {
+    /// Path to the capsule directory to import into.
+    path: PathBuf,
+
+    /// File or directory to copy in. A directory's internal structure is
+    /// preserved under data/<collection>/.
+    #[arg(long)]
+    source: PathBuf,
+
+    /// Name of the collection to import into (e.g. "photos", "email").
+    /// Registered in capsule.yaml automatically if not already declared
+    /// there.
+    #[arg(long)]
+    collection: String,
+
+    /// Free-text provenance description for the import event (e.g. "Gmail
+    /// Takeout export, jane@example.org"). Defaults to a description
+    /// naming the --source path.
+    #[arg(long = "source-description")]
+    source_description: Option<String>,
+
+    /// Who/what performed this import, recorded in the provenance event.
+    /// Defaults to "ptc CLI v<version>".
+    #[arg(long)]
+    agent: Option<String>,
+}
+
+#[derive(clap::Args)]
 struct SealArgs {
     /// Path to the capsule directory to seal. Must already contain a
     /// capsule.yaml (see `ptc init`) with a real release policy set.
@@ -64,6 +96,7 @@ fn run() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Command::Init(args) => cmd_init(&args),
+        Command::Import(args) => cmd_import(&args),
         Command::Seal(args) => cmd_seal(&args),
     }
 }
@@ -167,6 +200,39 @@ fn build_new_capsule(args: &InitArgs) -> Capsule {
             lifecycle_stage: LifecycleStage::Origination,
         },
     }
+}
+
+fn cmd_import(args: &ImportArgs) -> Result<()> {
+    let ImportSummary {
+        files_copied,
+        bytes_copied,
+        collection,
+        collection_path,
+        collection_registered,
+    } = import(
+        &args.path,
+        &args.source,
+        &args.collection,
+        args.source_description.as_deref(),
+        args.agent.as_deref(),
+    )?;
+
+    println!(
+        "Imported {} file(s) ({} bytes) from {} into {}/",
+        files_copied,
+        bytes_copied,
+        args.source.display(),
+        collection_path
+    );
+    if collection_registered {
+        println!(
+            "Registered new collection \"{}\" in capsule.yaml.",
+            collection
+        );
+    }
+    println!("Logged an import event in data/provenance/events.yaml.");
+
+    Ok(())
 }
 
 fn cmd_seal(args: &SealArgs) -> Result<()> {

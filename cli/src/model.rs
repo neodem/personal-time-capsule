@@ -11,7 +11,7 @@
 //! `#[serde(flatten)]`, so a hand-edited capsule.yaml with fields this
 //! model doesn't know about round-trips without data loss.
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
@@ -274,6 +274,116 @@ fn force_quote_date_like_fields(yaml: &str) -> String {
     out
 }
 
+/// Replace just the `lifecycle_stage:` line's value in `capsule.yaml`,
+/// leaving every other line -- including any hand-written comments --
+/// untouched. Deliberately not a full serde re-serialize: see
+/// `write_capsule_yaml`'s doc comment for why that would lose comments.
+/// Shared by `ptc seal` and `ptc import`.
+pub fn patch_lifecycle_stage(path: &Path, new_stage: &str) -> Result<()> {
+    let original =
+        fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+
+    let mut found = false;
+    let mut patched_lines: Vec<String> = Vec::new();
+    for line in original.lines() {
+        let trimmed = line.trim_start();
+        if trimmed.starts_with("lifecycle_stage:") {
+            let indent_len = line.len() - trimmed.len();
+            let indent = &line[..indent_len];
+            patched_lines.push(format!("{}lifecycle_stage: {}", indent, new_stage));
+            found = true;
+        } else {
+            patched_lines.push(line.to_string());
+        }
+    }
+
+    if !found {
+        bail!(
+            "could not find a `lifecycle_stage:` line in {} to update",
+            path.display()
+        );
+    }
+
+    let mut patched = patched_lines.join("\n");
+    if original.ends_with('\n') {
+        patched.push('\n');
+    }
+
+    fs::write(path, patched).with_context(|| format!("writing {}", path.display()))
+}
+
+/// Append a new entry to `collections:` in `capsule.yaml`, or add a
+/// `collections:` section (right before `access:`, which the schema
+/// requires, so it's always present) if none exists yet. Text-surgical,
+/// like `patch_lifecycle_stage` above, to avoid stripping comments via a
+/// full re-serialize.
+///
+/// Caller is responsible for checking the collection isn't already
+/// registered first (via the already-parsed `Capsule.collections`) --
+/// this function always appends unconditionally.
+pub fn patch_add_collection(path: &Path, name: &str, collection_path: &str) -> Result<()> {
+    let original =
+        fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+    let lines: Vec<&str> = original.lines().collect();
+
+    // (where to insert, whether a `collections:` header line is also needed)
+    let (insertion_index, needs_header) = if let Some(collections_idx) =
+        lines.iter().position(|l| *l == "collections:")
+    {
+        // Find the end of the collections block: the first line after it
+        // that's non-blank and unindented (a new top-level key), or EOF.
+        let mut end = collections_idx + 1;
+        while end < lines.len()
+            && (lines[end].trim().is_empty() || lines[end].starts_with([' ', '\t']))
+        {
+            end += 1;
+        }
+        // Back up over trailing blank lines so the new entry lands right
+        // after the last real entry, ahead of any blank line that
+        // already separates the block from whatever follows.
+        let mut content_end = end;
+        while content_end > collections_idx + 1 && lines[content_end - 1].trim().is_empty() {
+            content_end -= 1;
+        }
+        (content_end, false)
+    } else if let Some(access_idx) = lines.iter().position(|l| *l == "access:") {
+        // `access` is a required top-level field per capsule.schema.json,
+        // so it's always present to anchor a brand-new section against.
+        (access_idx, true)
+    } else {
+        bail!(
+                "could not find a `collections:` or `access:` line in {} to anchor a new collection entry",
+                path.display()
+            );
+    };
+
+    let mut new_lines: Vec<String> = Vec::new();
+    if needs_header {
+        new_lines.push("collections:".to_string());
+    } else {
+        new_lines.push(String::new());
+    }
+    new_lines.push(format!("  - name: {name}"));
+    new_lines.push(format!("    path: {collection_path}"));
+    if needs_header {
+        new_lines.push(String::new());
+    }
+
+    let mut patched_lines: Vec<String> = lines[..insertion_index]
+        .iter()
+        .map(|l| l.to_string())
+        .collect();
+    patched_lines.extend(new_lines);
+    patched_lines.extend(lines[insertion_index..].iter().map(|l| l.to_string()));
+
+    let mut patched = patched_lines.join("\n");
+    if original.ends_with('\n') {
+        patched.push('\n');
+    }
+
+    fs::write(path, patched).with_context(|| format!("writing {}", path.display()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -385,6 +495,63 @@ mod tests {
         assert!(
             text.lines().any(|l| l.trim() == r#"date: "2076-08-20""#),
             "expected a quoted release date; got:\n{text}"
+        );
+    }
+
+    #[test]
+    fn patch_lifecycle_stage_preserves_comments() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let path = dir.path().join("capsule.yaml");
+        fs::write(
+            &path,
+            "status:\n  # a hand-written comment\n  lifecycle_stage: origination\nother: true\n",
+        )
+        .unwrap();
+
+        patch_lifecycle_stage(&path, "import").unwrap();
+
+        let result = fs::read_to_string(&path).unwrap();
+        assert_eq!(
+            result,
+            "status:\n  # a hand-written comment\n  lifecycle_stage: import\nother: true\n"
+        );
+    }
+
+    #[test]
+    fn patch_add_collection_appends_to_existing_block() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let path = dir.path().join("capsule.yaml");
+        fs::write(
+            &path,
+            "collections:\n  - name: person\n    path: data/person\n\naccess:\n  default_privacy_zone: public\n",
+        )
+        .unwrap();
+
+        patch_add_collection(&path, "photos", "data/photos").unwrap();
+
+        let result = fs::read_to_string(&path).unwrap();
+        assert_eq!(
+            result,
+            "collections:\n  - name: person\n    path: data/person\n\n  - name: photos\n    path: data/photos\n\naccess:\n  default_privacy_zone: public\n"
+        );
+    }
+
+    #[test]
+    fn patch_add_collection_creates_section_before_access() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let path = dir.path().join("capsule.yaml");
+        fs::write(
+            &path,
+            "capsule:\n  id: x\naccess:\n  default_privacy_zone: public\n",
+        )
+        .unwrap();
+
+        patch_add_collection(&path, "photos", "data/photos").unwrap();
+
+        let result = fs::read_to_string(&path).unwrap();
+        assert_eq!(
+            result,
+            "capsule:\n  id: x\ncollections:\n  - name: photos\n    path: data/photos\n\naccess:\n  default_privacy_zone: public\n"
         );
     }
 
