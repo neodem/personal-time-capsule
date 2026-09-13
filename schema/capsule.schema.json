@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/neodem/personal-time-capsule/schema/capsule.schema.json",
   "title": "Personal Time Capsule — capsule.yaml",
-  "description": "Structural schema for a capsule's root tag file. See ../FORMAT.md for the field-by-field explanation and rationale. This schema covers ROADMAP.md items 7-8 (structure), 12 (privacy — see ../PRIVACY.md), and 13 (encryption — see ../ENCRYPTION.md). It deliberately does not encode the deeper semantics of access/release triggers (item 14) or custody/succession (item 15), still separate, not-yet-written model documents.",
+  "description": "Structural schema for a capsule's root tag file. See ../FORMAT.md for the field-by-field explanation and rationale. This schema covers ROADMAP.md items 7-8 (structure), 8a (capsule series), 12 (privacy — see ../PRIVACY.md), and 13 (encryption — see ../ENCRYPTION.md). It deliberately does not encode the deeper semantics of access/release triggers (item 14) or custody/succession (item 15), still separate, not-yet-written model documents.",
   "type": "object",
   "required": ["capsule", "access", "integrity", "status"],
   "additionalProperties": false,
@@ -45,6 +45,22 @@
       "additionalProperties": true,
       "properties": {
         "description": { "type": "string" }
+      }
+    },
+    "series": {
+      "type": "object",
+      "description": "Optional. For a creator's archive that spans multiple sequential capsules over a lifetime rather than one perpetually-unsealed capsule — see FORMAT.md and LIFECYCLE.md's 'Multiple capsules over a lifetime'. Most capsules omit this entirely.",
+      "additionalProperties": false,
+      "properties": {
+        "continues": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The capsule.id of the immediately preceding capsule in the same series, if this one picks up where an earlier, already-sealed capsule left off. Deliberately one-directional only — see FORMAT.md for why a 'continued_by' pointing at a later capsule isn't possible."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional free text on the relationship, e.g. what period this capsule covers or where the earlier one was deposited."
+        }
       }
     },
     "collections": {

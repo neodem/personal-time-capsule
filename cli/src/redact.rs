@@ -127,6 +127,7 @@ mod tests {
                 creator: None,
             },
             purpose: None,
+            series: None,
             collections: None,
             access: Access {
                 default_privacy_zone: PrivacyZone::Restricted,
