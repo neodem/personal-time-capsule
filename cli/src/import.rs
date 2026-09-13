@@ -82,6 +82,7 @@ pub fn import(
         .unwrap_or_else(|| format!("Copied from {}", source.display()));
     model::append_event(
         root,
+        model::EventLog::Provenance,
         &model::EventFields {
             event_type: "import",
             agent: &agent,
