@@ -18,3 +18,4 @@ pub mod redact;
 pub mod scan;
 pub mod seal;
 pub mod unlock;
+pub mod verify;
