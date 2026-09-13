@@ -11,6 +11,7 @@ use ptc::model::{
 use ptc::redact::{redact, RedactSummary};
 use ptc::scan::{scan, ScanReport};
 use ptc::seal::{seal, SealSummary};
+use ptc::verify::verify;
 use std::fs;
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
@@ -47,6 +48,9 @@ enum Command {
     /// actually encrypt. Key-splitting (SLIP-0039) is not implemented yet;
     /// --apply prints each unit's raw key for the creator to record.
     Encrypt(EncryptArgs),
+    /// Recompute every payload/tag file's checksum and compare against
+    /// manifest-sha256.txt / tagmanifest-sha256.txt. Read-only.
+    Verify(VerifyArgs),
 }
 
 #[derive(clap::Args)]
@@ -151,6 +155,12 @@ struct EncryptArgs {
     apply: bool,
 }
 
+#[derive(clap::Args)]
+struct VerifyArgs {
+    /// Path to the capsule directory to verify. Must already be sealed.
+    path: PathBuf,
+}
+
 fn main() {
     if let Err(err) = run() {
         eprintln!("error: {err:#}");
@@ -168,6 +178,7 @@ fn run() -> Result<()> {
         Command::Redact(args) => cmd_redact(&args),
         Command::Seal(args) => cmd_seal(&args),
         Command::Encrypt(args) => cmd_encrypt(&args),
+        Command::Verify(args) => cmd_verify(&args),
     }
 }
 
@@ -751,4 +762,76 @@ fn cmd_encrypt(args: &EncryptArgs) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn cmd_verify(args: &VerifyArgs) -> Result<()> {
+    let report = verify(&args.path)?;
+
+    println!("Verifying capsule at {}", args.path.display());
+    println!();
+    println!("Payload (manifest-sha256.txt):");
+    println!(
+        "  {} file(s) checked, {} OK",
+        report.payload_checked, report.payload_ok
+    );
+    if !report.payload_encrypted.is_empty() {
+        println!(
+            "  {} encrypted -- not independently verifiable until unlock (see ENCRYPTION.md):",
+            report.payload_encrypted.len()
+        );
+        for p in &report.payload_encrypted {
+            println!("    {p}");
+        }
+    }
+    if !report.payload_missing.is_empty() {
+        println!("  {} MISSING:", report.payload_missing.len());
+        for p in &report.payload_missing {
+            println!("    {p}");
+        }
+    }
+    if !report.payload_mismatched.is_empty() {
+        println!("  {} HASH MISMATCH:", report.payload_mismatched.len());
+        for p in &report.payload_mismatched {
+            println!("    {p}");
+        }
+    }
+
+    println!();
+    println!("Tag files (tagmanifest-sha256.txt):");
+    println!(
+        "  {} file(s) checked, {} OK",
+        report.tag_checked, report.tag_ok
+    );
+    if !report.tag_missing.is_empty() {
+        println!("  {} MISSING:", report.tag_missing.len());
+        for p in &report.tag_missing {
+            println!("    {p}");
+        }
+    }
+    if !report.tag_mismatched.is_empty() {
+        println!("  {} HASH MISMATCH:", report.tag_mismatched.len());
+        for p in &report.tag_mismatched {
+            println!("    {p}");
+        }
+    }
+
+    if !report.unexpected_files.is_empty() {
+        println!();
+        println!(
+            "Unexpected file(s) under data/ not recorded in manifest-sha256.txt (added after \
+             sealing without a reseal, or possible tampering):"
+        );
+        for p in &report.unexpected_files {
+            println!("  {p}");
+        }
+    }
+
+    println!();
+    if report.passed() {
+        println!("VERIFICATION PASSED.");
+        Ok(())
+    } else {
+        println!("VERIFICATION FAILED -- see above.");
+        bail!("capsule failed verification")
+    }
 }
