@@ -29,6 +29,11 @@ regex = "1"
 # ENCRYPTION.md's locked algorithm choice; see cli/src/cipher.rs for why
 # call sites go through a Cipher trait instead of this crate's API directly.
 chacha20poly1305 = "0.11"
+# ptc deposit's optional --archive: BagIt's own spec calls this
+# "serialization" -- a single-file wrapper purely for transport, unpacked
+# back into the same directory before anything is actually verified.
+tar = "0.4"
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 
 [dev-dependencies]
 tempfile = "3"
