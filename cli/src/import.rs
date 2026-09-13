@@ -115,10 +115,11 @@ fn guard_against_self_copy(source: &Path, collection_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Copy `source` (a file or a directory tree) into `collection_dir`,
-/// preserving the source's internal relative structure. Refuses (without
-/// copying anything) if any destination file already exists, rather than
-/// silently overwriting or leaving a half-finished copy behind.
+/// Copy `source` (a file or a directory tree) into `collection_dir` -- see
+/// `plan_copy` for how a directory's own name is preserved as a subfolder.
+/// Refuses (without copying anything) if any destination file already
+/// exists, rather than silently overwriting or leaving a half-finished
+/// copy behind.
 fn copy_into_collection(source: &Path, collection_dir: &Path) -> Result<(usize, u64)> {
     let pairs = plan_copy(source, collection_dir)?;
 
@@ -150,6 +151,13 @@ fn copy_into_collection(source: &Path, collection_dir: &Path) -> Result<(usize, 
     Ok((files_copied, bytes_copied))
 }
 
+/// A directory source is nested under its own name inside the collection
+/// (`data/photos/1945/img.jpg`, not a flattened `data/photos/img.jpg`) --
+/// otherwise re-importing several same-named-file source directories into
+/// one collection (e.g. a "1945" and a "1946" photo folder both going into
+/// "photos") would silently collide or lose which folder a file came from.
+/// A single-file source has no such structure to preserve and lands
+/// directly under the collection.
 fn plan_copy(source: &Path, collection_dir: &Path) -> Result<Vec<(PathBuf, PathBuf)>> {
     if source.is_file() {
         let file_name = source
@@ -157,6 +165,11 @@ fn plan_copy(source: &Path, collection_dir: &Path) -> Result<Vec<(PathBuf, PathB
             .with_context(|| format!("{} has no file name", source.display()))?;
         return Ok(vec![(source.to_path_buf(), collection_dir.join(file_name))]);
     }
+
+    let source_name = source
+        .file_name()
+        .with_context(|| format!("{} has no directory name", source.display()))?;
+    let dest_root = collection_dir.join(source_name);
 
     let mut pairs = Vec::new();
     for entry in WalkDir::new(source) {
@@ -168,7 +181,7 @@ fn plan_copy(source: &Path, collection_dir: &Path) -> Result<Vec<(PathBuf, PathB
             .path()
             .strip_prefix(source)
             .with_context(|| format!("computing a path relative to {}", source.display()))?;
-        pairs.push((entry.path().to_path_buf(), collection_dir.join(rel)));
+        pairs.push((entry.path().to_path_buf(), dest_root.join(rel)));
     }
     Ok(pairs)
 }
@@ -296,13 +309,53 @@ mod tests {
         assert_eq!(summary.files_copied, 2);
         assert_eq!(summary.bytes_copied, 3);
 
+        // The source directory's own name ("export") is preserved as a
+        // subfolder, so re-importing a same-named-file "2021" folder later
+        // wouldn't collide with this one.
         assert!(root
             .join("data")
             .join("writing")
+            .join("export")
             .join("2020")
             .join("a.txt")
             .exists());
-        assert!(root.join("data").join("writing").join("b.txt").exists());
+        assert!(root
+            .join("data")
+            .join("writing")
+            .join("export")
+            .join("b.txt")
+            .exists());
+    }
+
+    #[test]
+    fn imports_multiple_source_directories_into_one_collection_without_colliding() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        write_test_capsule(root, LifecycleStage::Origination);
+
+        let dir_1945 = dir.path().join("1945");
+        fs::create_dir_all(&dir_1945).unwrap();
+        fs::write(dir_1945.join("img0001.jpg"), b"a").unwrap();
+
+        let dir_1946 = dir.path().join("1946");
+        fs::create_dir_all(&dir_1946).unwrap();
+        fs::write(dir_1946.join("img0001.jpg"), b"bb").unwrap();
+
+        import(root, &dir_1945, "photos", None, None).unwrap();
+        import(root, &dir_1946, "photos", None, None).unwrap();
+
+        assert!(root
+            .join("data")
+            .join("photos")
+            .join("1945")
+            .join("img0001.jpg")
+            .exists());
+        assert!(root
+            .join("data")
+            .join("photos")
+            .join("1946")
+            .join("img0001.jpg")
+            .exists());
     }
 
     #[test]
@@ -311,21 +364,24 @@ mod tests {
         let root = dir.path();
         write_test_capsule(root, LifecycleStage::Origination);
 
-        let collection_dir = root.join("data").join("photos");
-        fs::create_dir_all(&collection_dir).unwrap();
-        fs::write(collection_dir.join("photo.jpg"), b"already here").unwrap();
-
         let source_dir = dir.path().join("source");
         fs::create_dir_all(&source_dir).unwrap();
         fs::write(source_dir.join("photo.jpg"), b"new content").unwrap();
 
+        // Pre-existing file at the path this import will actually land on
+        // -- nested under the source directory's own name.
+        let conflicting = root
+            .join("data")
+            .join("photos")
+            .join("source")
+            .join("photo.jpg");
+        fs::create_dir_all(conflicting.parent().unwrap()).unwrap();
+        fs::write(&conflicting, b"already here").unwrap();
+
         let result = import(root, &source_dir, "photos", None, None);
         assert!(result.is_err());
         // Original content must be untouched.
-        assert_eq!(
-            fs::read(collection_dir.join("photo.jpg")).unwrap(),
-            b"already here"
-        );
+        assert_eq!(fs::read(&conflicting).unwrap(), b"already here");
     }
 
     #[test]

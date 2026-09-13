@@ -55,8 +55,11 @@ struct ImportArgs {
     /// Path to the capsule directory to import into.
     path: PathBuf,
 
-    /// File or directory to copy in. A directory's internal structure is
-    /// preserved under data/<collection>/.
+    /// File or directory to copy in. A directory is nested under its own
+    /// name inside the collection (data/<collection>/<dir-name>/...), so
+    /// importing several source directories into one collection (e.g. a
+    /// "1945" and a "1946" photo folder both going into "photos") can't
+    /// collide.
     #[arg(long)]
     source: PathBuf,
 
