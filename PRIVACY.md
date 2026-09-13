@@ -75,7 +75,7 @@ An entry can set `privacy_zone`, `release_policy`, or both — a photo that shou
 
 ## Sensitive-data-scanning categories
 
-An **open, recommended vocabulary**, not a closed enum — `category` in the schema accepts any string. This matches the precedent `capsule.schema.json` already set with `encryption.key_custody.scheme`: the real taxonomy isn't settled by field experience yet (no `ptc scan` exists — that's `ROADMAP.md` item 24, and Phase 5's real-world validation is where a taxonomy like this actually gets tested), so this document recommends a starting point rather than locking one in prematurely.
+An **open, recommended vocabulary**, not a closed enum — `category` in the schema accepts any string. This matches the precedent `capsule.schema.json` already set with `encryption.key_custody.scheme`: the real taxonomy isn't settled by field experience yet (`ptc scan`, `ROADMAP.md` item 24, only detects `financial`/`credentials`/`government-id` so far — `medical` and `third-party-privacy` still need a human or Phase 5's real-world validation to surface), so this document recommends a starting point rather than locking one in prematurely.
 
 Recommended starter categories, drawn directly from `THREAT_MODEL.md` #8:
 
@@ -91,7 +91,7 @@ Creators and future tooling are free to use other category strings; these six ju
 ## What's deliberately out of scope here
 
 - **Redaction mechanics.** *Whether* an item is redacted, and how a redacted copy relates to its original (kept alongside in a stricter zone? overwritten entirely?), is `LIFECYCLE.md` stage 4's job to describe and `ROADMAP.md` item 25 (`ptc redact`) to implement — this document only covers *classifying* an item's privacy zone, not modifying its content.
-- **Automated scanning itself.** What patterns or techniques actually detect an SSN or a credential in the wild is `ROADMAP.md` item 24 (`ptc scan`) — a Phase 4 tooling concern. This document only defines where a scan's *findings*, once a creator confirms them, get recorded.
+- **Automated scanning itself.** `ROADMAP.md` item 24 (`ptc scan`, see `cli/README.md`) is the Phase 4 tooling that actually detects candidate SSNs, credit card numbers, and credentials via regex, and it's report-only by design -- it never writes here itself. This document only defines where a scan's *findings*, once a creator reviews and confirms them, get recorded.
 
 ## Open questions
 
