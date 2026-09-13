@@ -47,7 +47,7 @@ Started early/experimentally (see `cli/`) — the spec (Phases 2–3) has since 
 25a. 🚧 `ptc seal` — `cli/` (LIFECYCLE.md stage 5; no command existed for this stage until now, even though `verify`/`encrypt`/`deposit` all assume a manifest already exists — see `cli/README.md`)
 26. 🚧 `ptc encrypt` — `cli/` (LIFECYCLE.md stage 6; XChaCha20-Poly1305 payload encryption only, one key per unit (named collection, or `data/person`/`data/provenance` under the capsule default), dry-run by default; built around a `Cipher` trait so a future algorithm change is a new impl, not a rewrite; never writes to `capsule.yaml` — logs to `preservation-log.yaml` instead, since `capsule.yaml` is frozen forever once sealed; SLIP-0039 key-splitting is NOT implemented — no solid Rust crate exists, so `--apply` issues each unit's raw key directly to the creator — see `cli/README.md` and `ENCRYPTION.md`)
 27. ⬜ `ptc verify`
-28. ⬜ `ptc unlock`
+28. 🚧 `ptc unlock` — `cli/` (LIFECYCLE.md stage 10; the inverse of `ptc encrypt` -- takes a unit's raw key directly (no SLIP-0039 quorum reconstruction, since none was ever split), dry-run by default validating the key against every `.enc` file before `--apply` writes anything; logs to `preservation-log.yaml`, same reasoning as `ptc encrypt` — see `cli/README.md`)
 29. ⬜ `ptc deposit`
 
 ## Phase 5 — Real-world validation ⬜

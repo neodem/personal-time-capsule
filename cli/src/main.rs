@@ -11,7 +11,9 @@ use ptc::model::{
 use ptc::redact::{redact, RedactSummary};
 use ptc::scan::{scan, ScanReport};
 use ptc::seal::{seal, SealSummary};
+use ptc::unlock::{unlock, UnlockSummary};
 use std::fs;
+use std::io::BufRead;
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
@@ -47,6 +49,10 @@ enum Command {
     /// actually encrypt. Key-splitting (SLIP-0039) is not implemented yet;
     /// --apply prints each unit's raw key for the creator to record.
     Encrypt(EncryptArgs),
+    /// Decrypt one unit's .enc files back to plaintext, given the key
+    /// ptc encrypt --apply issued for it. Dry run by default -- pass
+    /// --apply to actually rewrite the unit.
+    Unlock(UnlockArgs),
 }
 
 #[derive(clap::Args)]
@@ -151,6 +157,29 @@ struct EncryptArgs {
     apply: bool,
 }
 
+#[derive(clap::Args)]
+struct UnlockArgs {
+    /// Path to the capsule directory to unlock.
+    path: PathBuf,
+
+    /// Name of the unit to unlock (a collection name, or "person"/
+    /// "provenance"), matching what `ptc encrypt` reported for it.
+    #[arg(long)]
+    collection: String,
+
+    /// The unit's key, hex-encoded, exactly as `ptc encrypt --apply`
+    /// printed it. If omitted, read one line from stdin instead --
+    /// safer than a flag when the key shouldn't end up in shell history.
+    #[arg(long)]
+    key: Option<String>,
+
+    /// Actually decrypt and remove the ciphertext. Without this, ptc
+    /// unlock only confirms the key decrypts every file in the unit,
+    /// without writing or removing anything.
+    #[arg(long)]
+    apply: bool,
+}
+
 fn main() {
     if let Err(err) = run() {
         eprintln!("error: {err:#}");
@@ -168,6 +197,7 @@ fn run() -> Result<()> {
         Command::Redact(args) => cmd_redact(&args),
         Command::Seal(args) => cmd_seal(&args),
         Command::Encrypt(args) => cmd_encrypt(&args),
+        Command::Unlock(args) => cmd_unlock(&args),
     }
 }
 
@@ -748,6 +778,43 @@ fn cmd_encrypt(args: &EncryptArgs) -> Result<()> {
         }
     } else {
         println!("Re-run with --apply to actually encrypt.");
+    }
+
+    Ok(())
+}
+
+fn cmd_unlock(args: &UnlockArgs) -> Result<()> {
+    let key = match &args.key {
+        Some(k) => k.clone(),
+        None => {
+            let stdin = std::io::stdin();
+            let mut line = String::new();
+            stdin
+                .lock()
+                .read_line(&mut line)
+                .context("reading key from stdin")?;
+            line.trim().to_string()
+        }
+    };
+
+    let UnlockSummary {
+        name,
+        path,
+        files_unlocked,
+        applied,
+    } = unlock(&args.path, &args.collection, &key, args.apply)?;
+
+    if files_unlocked == 0 {
+        println!("{name} ({path}): no encrypted (.enc) files found -- nothing to unlock.");
+        return Ok(());
+    }
+
+    if applied {
+        println!("{name} ({path}): {files_unlocked} file(s) decrypted.");
+        println!("Logged an unlock event in preservation-log.yaml.");
+    } else {
+        println!("{name} ({path}): key verified -- {files_unlocked} file(s) would be decrypted.");
+        println!("Re-run with --apply to actually decrypt and remove the ciphertext.");
     }
 
     Ok(())
