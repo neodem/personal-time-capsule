@@ -36,6 +36,19 @@ pub fn manifest_line(hash: &str, relative_path: &str) -> String {
     format!("{}  {}", hash, relative_path.replace('\\', "/"))
 }
 
+/// Parse one manifest line back into `(hash, relative_path)` -- the
+/// inverse of `manifest_line`, used by `ptc verify` to read
+/// `manifest-sha256.txt`/`tagmanifest-sha256.txt`. `None` for anything
+/// that doesn't have the two-space-separated shape every manifest this
+/// project writes always has.
+pub fn parse_manifest_line(line: &str) -> Option<(String, String)> {
+    let (hash, path) = line.split_once("  ")?;
+    if hash.is_empty() || path.is_empty() {
+        return None;
+    }
+    Some((hash.to_string(), path.to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -61,5 +74,20 @@ mod tests {
     fn manifest_line_uses_forward_slashes_and_two_spaces() {
         let line = manifest_line("abc123", "data\\photos\\a.jpg");
         assert_eq!(line, "abc123  data/photos/a.jpg");
+    }
+
+    #[test]
+    fn parse_manifest_line_is_the_inverse_of_manifest_line() {
+        let line = manifest_line("abc123", "data/photos/a.jpg");
+        assert_eq!(
+            parse_manifest_line(&line),
+            Some(("abc123".to_string(), "data/photos/a.jpg".to_string()))
+        );
+    }
+
+    #[test]
+    fn parse_manifest_line_rejects_malformed_input() {
+        assert_eq!(parse_manifest_line("not a manifest line"), None);
+        assert_eq!(parse_manifest_line(""), None);
     }
 }
