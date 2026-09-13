@@ -42,7 +42,7 @@ Started early/experimentally (see `cli/`) — the spec (Phases 2–3) has since 
 21. 🚧 `ptc init` — `cli/` (Rust; non-interactive/flags-only, now backed by a real `serde` capsule model, see `cli/README.md`)
 22. 🚧 `ptc import` — `cli/` (LIFECYCLE.md stage 2; copies a file/directory into `data/<collection>/`, auto-registers the collection in `capsule.yaml` if new, and logs an `import` event in `data/provenance/events.yaml`; refuses once a capsule is past the pre-seal amend loop)
 23. 🚧 `ptc inspect` — `cli/` (read-only summary: capsule identity/stage, `data/person/` presence, provenance event count, each collection's actual size and resolved privacy/release policy, undeclared `data/` directories, optional tag files, and manifest presence — see `cli/README.md`)
-24. ⬜ `ptc scan`
+24. 🚧 `ptc scan` — `cli/` (LIFECYCLE.md stage 4; report-only regex scan of `data/` for `PRIVACY.md`'s `financial`/`credentials`/`government-id` categories — SSNs, Luhn-checked credit card numbers, AWS keys, private key headers, credential assignments — with masked output and no writes; `medical`/`third-party-privacy` need semantic understanding no regex can provide, so aren't attempted — see `cli/README.md`)
 25. ⬜ `ptc redact`
 25a. 🚧 `ptc seal` — `cli/` (LIFECYCLE.md stage 5; no command existed for this stage until now, even though `verify`/`encrypt`/`deposit` all assume a manifest already exists — see `cli/README.md`)
 26. ⬜ `ptc encrypt`

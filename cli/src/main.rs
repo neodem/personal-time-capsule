@@ -7,6 +7,7 @@ use ptc::model::{
     self, Access, Capsule, CapsuleIdentity, Creator, Integrity, LifecycleStage, ManifestAlgorithm,
     PrivacyZone, Purpose, ReleasePolicy, ReleasePolicyType, Status, SPEC_VERSION,
 };
+use ptc::scan::{scan, ScanReport};
 use ptc::seal::{seal, SealSummary};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -29,6 +30,10 @@ enum Command {
     /// Print a read-only summary of a capsule's current state: collections,
     /// the human-context layer, provenance, and optional tag files.
     Inspect(InspectArgs),
+    /// Scan a capsule's payload for candidate sensitive-data findings
+    /// (SSNs, credit card numbers, credentials). Report only -- writes
+    /// nothing.
+    Scan(ScanArgs),
     /// Seal a capsule: compute manifest-sha256.txt / tagmanifest-sha256.txt,
     /// write bag-info.txt, and mark status.lifecycle_stage as "sealing".
     Seal(SealArgs),
@@ -92,6 +97,16 @@ struct InspectArgs {
 }
 
 #[derive(clap::Args)]
+struct ScanArgs {
+    /// Path to the capsule directory to scan.
+    path: PathBuf,
+
+    /// Limit the scan to one named collection instead of all of data/.
+    #[arg(long)]
+    collection: Option<String>,
+}
+
+#[derive(clap::Args)]
 struct SealArgs {
     /// Path to the capsule directory to seal. Must already contain a
     /// capsule.yaml (see `ptc init`) with a real release policy set.
@@ -111,6 +126,7 @@ fn run() -> Result<()> {
         Command::Init(args) => cmd_init(&args),
         Command::Import(args) => cmd_import(&args),
         Command::Inspect(args) => cmd_inspect(&args),
+        Command::Scan(args) => cmd_scan(&args),
         Command::Seal(args) => cmd_seal(&args),
     }
 }
@@ -502,6 +518,55 @@ fn describe_count(count: Option<usize>, singular: &str, plural: &str) -> String 
         Some(n) => format!("{n} {plural}"),
         None => "not present".to_string(),
     }
+}
+
+fn cmd_scan(args: &ScanArgs) -> Result<()> {
+    let ScanReport {
+        scan_root,
+        files_scanned,
+        files_skipped_binary,
+        findings,
+    } = scan(&args.path, args.collection.as_deref())?;
+
+    println!(
+        "Scanned {} file(s) under {}/ ({} skipped as binary).",
+        files_scanned, scan_root, files_skipped_binary
+    );
+    println!();
+
+    if findings.is_empty() {
+        println!("No findings.");
+    } else {
+        println!("Findings ({}):", findings.len());
+        for f in &findings {
+            let snippet = match &f.snippet {
+                Some(s) => format!(": {s}"),
+                None => String::new(),
+            };
+            println!(
+                "  {}:{}  [{}]  {}{}",
+                f.path, f.line, f.category, f.description, snippet
+            );
+        }
+
+        println!();
+        println!("By category:");
+        for category in ["financial", "credentials", "government-id"] {
+            let count = findings.iter().filter(|f| f.category == category).count();
+            if count > 0 {
+                println!("  {category}: {count}");
+            }
+        }
+    }
+
+    println!();
+    println!("Nothing here is written automatically. `ptc scan` only surfaces");
+    println!("candidates -- per PRINCIPLES.md #2, deciding what's actually");
+    println!("sensitive is yours, not the tool's. Review each finding and, if");
+    println!("it's real, record it yourself in privacy-overrides.yaml (see");
+    println!("PRIVACY.md) using the category shown above.");
+
+    Ok(())
 }
 
 fn cmd_seal(args: &SealArgs) -> Result<()> {

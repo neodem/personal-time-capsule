@@ -1,6 +1,6 @@
 # ptc (reference CLI) — experimental
 
-An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, `ptc inspect`, and `ptc seal` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
+An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, `ptc inspect`, `ptc scan`, and `ptc seal` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
 
 Written in Rust; licensed [Apache-2.0](../LICENSE) like the rest of this project's code/tooling.
 
@@ -68,6 +68,16 @@ A read-only summary of a capsule's current state — no writes, no exit-code gat
 Sits, per `LIFECYCLE.md`'s command ordering, between `import`/annotation and `scan`/screening: "what's actually in here right now," distinct from integrity verification or sensitive-data scanning. Everything it reads is read leniently (no `deny_unknown_fields`) — a hand-edited or future-schema-extended file shouldn't make a reporting tool itself fail to run; structural validation is `ptc verify`'s job.
 
 ```sh
+ptc scan <path> [--collection NAME]
+```
+
+`LIFECYCLE.md` stage 4 (Screening) tooling: walks the capsule's payload (all of `data/`, or one collection with `--collection`) looking for candidate sensitive-data findings and prints a report — a file/line, a category (`PRIVACY.md`'s vocabulary: `financial`, `credentials`, `government-id`), a description, and a masked excerpt where anything is safe to show at all (an SSN or credit card number's last 4 digits; nothing for a matched credential, ever). Detects: US SSN format; credit card numbers (Luhn-checksum validated to cut false positives on arbitrary long digit runs); AWS access key IDs; PEM private key block headers; and a generic `password`/`api_key`/`secret`/`token` assignment heuristic. Files that look binary (a NUL byte in a leading sample, same heuristic `git` uses) are skipped, not scanned.
+
+**`ptc scan` writes nothing, ever** — no `privacy-overrides.yaml` entry, draft or otherwise. Per `LIFECYCLE.md`'s own framing of this stage ("the tooling surfaces candidates, the creator decides," `PRINCIPLES.md` #2), turning a finding into an actual override is the creator's own edit to `privacy-overrides.yaml` (see `PRIVACY.md`), using the category `ptc scan` printed as a starting point.
+
+**Deliberately not attempted**: `medical` and `third-party-privacy` (`PRIVACY.md`'s other two starter categories) need semantic understanding — knowing a name belongs to someone other than the creator, or that a paragraph describes a diagnosis — that no regex can responsibly claim to provide, so `ptc scan` doesn't pretend to detect them.
+
+```sh
 ptc seal <path>
 ```
 
@@ -85,4 +95,6 @@ Seals a capsule (`LIFECYCLE.md` stage 5, `ROADMAP.md` item 25a — there was no 
 - `ptc seal` doesn't yet handle encrypted collections specially (that's `ptc encrypt`, not built yet) — it hashes whatever is on disk under `data/` at the time it's run.
 - `ptc import` only sets a collection's `name`/`path` when auto-registering it — privacy zone, release policy, and encryption settings are left as the creator's own edit, same as `ptc init` leaving the release policy as a placeholder.
 - `ptc inspect`'s collection-size and undeclared-directory scans are simple recursive walks with no encryption-awareness -- fine today (nothing is encrypted yet), but will need revisiting once `ptc encrypt` exists.
-- No `ptc scan`, `ptc redact`, `ptc encrypt`, `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 24, 25, 26–29).
+- `ptc scan`'s credential-assignment heuristic (`password:`/`api_key=`/... followed by an 8+ character value) is deliberately broad and will produce false positives (an empty template field, a made-up placeholder) -- acceptable since nothing acts on a finding automatically, but worth knowing before treating a long finding list as alarming.
+- `ptc scan` reads whole files into memory with no size cap -- fine at personal-archive scale, but a pathologically large plaintext file could be slow. No cap was added since nothing else in this codebase caps file size either (`ptc seal` hashes full files the same way).
+- No `ptc redact`, `ptc encrypt`, `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 25–29).
