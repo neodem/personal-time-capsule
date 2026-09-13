@@ -9,7 +9,6 @@
 
 use crate::model::{self, LifecycleStage};
 use anyhow::{bail, Context, Result};
-use chrono::Utc;
 use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
@@ -44,7 +43,7 @@ pub fn import(
         )
     })?;
 
-    guard_against_post_seal_import(capsule.status.lifecycle_stage)?;
+    model::ensure_pre_seal_stage(capsule.status.lifecycle_stage)?;
 
     let existing = capsule
         .collections
@@ -81,12 +80,17 @@ pub fn import(
     let source_description = source_description
         .map(str::to_string)
         .unwrap_or_else(|| format!("Copied from {}", source.display()));
-    append_import_event(
+    model::append_event(
         root,
-        collection,
-        &destination_rel,
-        &source_description,
-        &agent,
+        &model::EventFields {
+            event_type: "import",
+            agent: &agent,
+            collection: Some(collection),
+            path: Some(&destination_rel),
+            source: Some(&source_description),
+            outcome: None,
+            note: None,
+        },
     )?;
 
     Ok(ImportSummary {
@@ -96,21 +100,6 @@ pub fn import(
         collection_path: collection_rel_path,
         collection_registered,
     })
-}
-
-/// The amend loop (LIFECYCLE.md stages 1-4) is only valid before sealing --
-/// once a manifest exists, importing more files without re-sealing would
-/// silently invalidate it rather than being caught as tampering.
-fn guard_against_post_seal_import(stage: LifecycleStage) -> Result<()> {
-    use LifecycleStage::*;
-    match stage {
-        Origination | Import | Annotation | Screening => Ok(()),
-        _ => bail!(
-            "capsule.yaml's status.lifecycle_stage is {stage:?}, past the pre-seal amend loop -- \
-             importing now would silently invalidate an existing manifest instead of being caught \
-             as tampering. Re-run `ptc seal` after importing if you need to add material this late."
-        ),
-    }
 }
 
 fn guard_against_self_copy(source: &Path, collection_dir: &Path) -> Result<()> {
@@ -199,52 +188,6 @@ fn plan_copy(source: &Path, collection_dir: &Path) -> Result<Vec<(PathBuf, PathB
         pairs.push((entry.path().to_path_buf(), dest_root.join(rel)));
     }
     Ok(pairs)
-}
-
-fn append_import_event(
-    root: &Path,
-    collection: &str,
-    destination_rel: &str,
-    source: &str,
-    agent: &str,
-) -> Result<()> {
-    let events_path = root.join("data").join("provenance").join("events.yaml");
-    let date = Utc::now().format("%Y-%m-%d");
-    let path_escaped = escape_yaml_double_quoted(destination_rel);
-    let source_escaped = escape_yaml_double_quoted(source);
-    let agent_escaped = escape_yaml_double_quoted(agent);
-
-    let entry = format!(
-        "- date: \"{date}\"\n  type: import\n  agent: \"{agent_escaped}\"\n  collection: {collection}\n  path: \"{path_escaped}\"\n  source: \"{source_escaped}\"\n"
-    );
-
-    if events_path.exists() {
-        let mut existing = fs::read_to_string(&events_path)
-            .with_context(|| format!("reading {}", events_path.display()))?;
-        if !existing.ends_with('\n') {
-            existing.push('\n');
-        }
-        existing.push('\n');
-        existing.push_str(&entry);
-        fs::write(&events_path, existing)
-            .with_context(|| format!("writing {}", events_path.display()))
-    } else {
-        if let Some(parent) = events_path.parent() {
-            fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
-        }
-        let header = "# data/provenance/events.yaml -- see METADATA.md for the field reference:\n\
-                      # https://github.com/neodem/personal-time-capsule/blob/main/METADATA.md\n\n";
-        let contents = format!("{header}{entry}");
-        fs::write(&events_path, contents)
-            .with_context(|| format!("writing {}", events_path.display()))
-    }
-}
-
-/// Escape `"` and `\` for embedding in a double-quoted YAML scalar. The
-/// free-text `agent`/`source` fields are attacker-controllable-ish (a
-/// creator's own free-text input) so this can't assume they're quote-free.
-fn escape_yaml_double_quoted(s: &str) -> String {
-    s.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
 #[cfg(test)]
