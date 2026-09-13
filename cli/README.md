@@ -1,6 +1,6 @@
 # ptc (reference CLI) — experimental
 
-An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, `ptc inspect`, `ptc scan`, and `ptc seal` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
+An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, `ptc inspect`, `ptc scan`, `ptc redact`, and `ptc seal` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
 
 Written in Rust; licensed [Apache-2.0](../LICENSE) like the rest of this project's code/tooling.
 
@@ -78,6 +78,18 @@ ptc scan <path> [--collection NAME]
 **Deliberately not attempted**: `medical` and `third-party-privacy` (`PRIVACY.md`'s other two starter categories) need semantic understanding — knowing a name belongs to someone other than the creator, or that a paragraph describes a diagnosis — that no regex can responsibly claim to provide, so `ptc scan` doesn't pretend to detect them.
 
 ```sh
+ptc redact <path> --target <rel-path> [--apply]
+```
+
+`LIFECYCLE.md` stage 4 (Screening) tooling, alongside `ptc scan`: where scan only reports, `ptc redact` actually neutralizes findings in one creator-named file (`--target`, relative to the capsule root, e.g. `data/email/2020-taxes.eml`). **Dry run by default** — without `--apply` it prints exactly the same report `ptc scan` would show for this one file and writes nothing; only `--apply` rewrites it. Every matched SSN, credit card number, and AWS access key is replaced with `[REDACTED]`; a credential-assignment match keeps its label and redacts only the value (`password: [REDACTED]`, not the whole line).
+
+**A private key block header is deliberately never auto-redacted.** The detector only recognizes the `-----BEGIN...-----` line, not the multi-line key body that follows — "redacting" just that line would blank the label while leaving the actual key material intact, which is worse than not touching it at all since it would look handled. `ptc redact` still reports it (tagged `[MANUAL REVIEW -- not auto-redactable]`) so the creator knows to handle it by hand, but `--apply` skips it.
+
+**Answers `PRIVACY.md`'s own open question about redaction mechanics** (item 25's job: "kept alongside in a stricter zone, or overwritten entirely?") by overwriting the target file in place, with **no automatic backup copy**. The safety net is the workflow — dry run first, explicit `--apply` to commit — not a hidden file; a creator who wants an undo path should keep their own copy or use version control before applying. A successful `--apply` logs a `screening` event to `data/provenance/events.yaml` (`path`, and an `outcome` summarizing how many redactions were applied).
+
+`ptc redact` refuses (non-zero exit, clear error, nothing written) if: `--target` isn't under `data/` (payload, not a tag file like `capsule.yaml`); the target doesn't exist or isn't a file; the target looks binary; or the capsule is already past the pre-seal amend loop (`sealing` or later) — same reasoning, and the same shared guard, as `ptc import`.
+
+```sh
 ptc seal <path>
 ```
 
@@ -96,5 +108,7 @@ Seals a capsule (`LIFECYCLE.md` stage 5, `ROADMAP.md` item 25a — there was no 
 - `ptc import` only sets a collection's `name`/`path` when auto-registering it — privacy zone, release policy, and encryption settings are left as the creator's own edit, same as `ptc init` leaving the release policy as a placeholder.
 - `ptc inspect`'s collection-size and undeclared-directory scans are simple recursive walks with no encryption-awareness -- fine today (nothing is encrypted yet), but will need revisiting once `ptc encrypt` exists.
 - `ptc scan`'s credential-assignment heuristic (`password:`/`api_key=`/... followed by an 8+ character value) is deliberately broad and will produce false positives (an empty template field, a made-up placeholder) -- acceptable since nothing acts on a finding automatically, but worth knowing before treating a long finding list as alarming.
-- `ptc scan` reads whole files into memory with no size cap -- fine at personal-archive scale, but a pathologically large plaintext file could be slow. No cap was added since nothing else in this codebase caps file size either (`ptc seal` hashes full files the same way).
-- No `ptc redact`, `ptc encrypt`, `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 25–29).
+- `ptc scan`/`ptc redact` read whole files into memory with no size cap -- fine at personal-archive scale, but a pathologically large plaintext file could be slow. No cap was added since nothing else in this codebase caps file size either (`ptc seal` hashes full files the same way).
+- `ptc redact` only targets one file per invocation -- there's no `--collection`-wide "redact everything scan would flag" mode. Deliberate: pointing the tool at a specific file is itself part of the creator's decision (`PRINCIPLES.md` #2), not something to automate away.
+- `ptc redact --apply` has no undo mechanism beyond whatever backup/version control the creator kept themselves -- see its "no automatic backup copy" note above.
+- No `ptc encrypt`, `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 26–29).

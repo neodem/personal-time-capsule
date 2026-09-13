@@ -7,6 +7,7 @@ use ptc::model::{
     self, Access, Capsule, CapsuleIdentity, Creator, Integrity, LifecycleStage, ManifestAlgorithm,
     PrivacyZone, Purpose, ReleasePolicy, ReleasePolicyType, Status, SPEC_VERSION,
 };
+use ptc::redact::{redact, RedactSummary};
 use ptc::scan::{scan, ScanReport};
 use ptc::seal::{seal, SealSummary};
 use std::fs;
@@ -34,6 +35,9 @@ enum Command {
     /// (SSNs, credit card numbers, credentials). Report only -- writes
     /// nothing.
     Scan(ScanArgs),
+    /// Redact candidate sensitive-data findings in one file. Dry run by
+    /// default -- pass --apply to actually rewrite the file.
+    Redact(RedactArgs),
     /// Seal a capsule: compute manifest-sha256.txt / tagmanifest-sha256.txt,
     /// write bag-info.txt, and mark status.lifecycle_stage as "sealing".
     Seal(SealArgs),
@@ -107,6 +111,22 @@ struct ScanArgs {
 }
 
 #[derive(clap::Args)]
+struct RedactArgs {
+    /// Path to the capsule directory containing the file to redact.
+    path: PathBuf,
+
+    /// The file to redact, relative to the capsule root (e.g.
+    /// "data/email/2020-taxes.eml").
+    #[arg(long)]
+    target: String,
+
+    /// Actually rewrite the file. Without this, ptc redact only reports
+    /// what it would do (identical to `ptc scan` for this one file).
+    #[arg(long)]
+    apply: bool,
+}
+
+#[derive(clap::Args)]
 struct SealArgs {
     /// Path to the capsule directory to seal. Must already contain a
     /// capsule.yaml (see `ptc init`) with a real release policy set.
@@ -127,6 +147,7 @@ fn run() -> Result<()> {
         Command::Import(args) => cmd_import(&args),
         Command::Inspect(args) => cmd_inspect(&args),
         Command::Scan(args) => cmd_scan(&args),
+        Command::Redact(args) => cmd_redact(&args),
         Command::Seal(args) => cmd_seal(&args),
     }
 }
@@ -565,6 +586,63 @@ fn cmd_scan(args: &ScanArgs) -> Result<()> {
     println!("sensitive is yours, not the tool's. Review each finding and, if");
     println!("it's real, record it yourself in privacy-overrides.yaml (see");
     println!("PRIVACY.md) using the category shown above.");
+
+    Ok(())
+}
+
+fn cmd_redact(args: &RedactArgs) -> Result<()> {
+    let RedactSummary {
+        path,
+        findings,
+        redactions_applied,
+        ..
+    } = redact(&args.path, &args.target, args.apply)?;
+
+    if findings.is_empty() {
+        println!("No candidate findings in {path} -- nothing to redact.");
+        return Ok(());
+    }
+
+    println!("Findings in {path} ({}):", findings.len());
+    for f in &findings {
+        let snippet = match &f.snippet {
+            Some(s) => format!(": {s}"),
+            None => String::new(),
+        };
+        let tag = if f.redactable {
+            ""
+        } else {
+            "  [MANUAL REVIEW -- not auto-redactable]"
+        };
+        println!(
+            "  line {}  [{}]  {}{}{}",
+            f.line, f.category, f.description, snippet, tag
+        );
+    }
+    println!();
+
+    let manual_review_count = findings.iter().filter(|f| !f.redactable).count();
+
+    if args.apply {
+        if redactions_applied > 0 {
+            println!("Applied {redactions_applied} redaction(s) to {path}.");
+            println!("Logged a screening event in data/provenance/events.yaml.");
+        } else {
+            println!("Nothing auto-redactable was found -- {path} left unchanged.");
+        }
+        if manual_review_count > 0 {
+            println!(
+                "{manual_review_count} finding(s) need manual review (see above) -- \
+                 ptc redact does not modify these."
+            );
+        }
+    } else {
+        let auto_redactable_count = findings.len() - manual_review_count;
+        println!(
+            "Dry run -- {path} was not modified. Re-run with --apply to redact the \
+             {auto_redactable_count} auto-redactable finding(s) above in place."
+        );
+    }
 
     Ok(())
 }

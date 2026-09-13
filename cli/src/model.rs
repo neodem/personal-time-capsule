@@ -384,6 +384,97 @@ pub fn patch_add_collection(path: &Path, name: &str, collection_path: &str) -> R
     fs::write(path, patched).with_context(|| format!("writing {}", path.display()))
 }
 
+/// The pre-seal amend loop (`LIFECYCLE.md` stages 1-4) is only valid before
+/// sealing -- once a manifest exists, mutating payload content without
+/// re-sealing would silently invalidate it instead of being caught as
+/// tampering. Shared by `ptc import` and `ptc redact`.
+pub fn ensure_pre_seal_stage(stage: LifecycleStage) -> Result<()> {
+    use LifecycleStage::*;
+    match stage {
+        Origination | Import | Annotation | Screening => Ok(()),
+        _ => bail!(
+            "capsule.yaml's status.lifecycle_stage is {stage:?}, past the pre-seal amend loop -- \
+             modifying data/ now would silently invalidate an existing manifest instead of being \
+             caught as tampering. Re-run `ptc seal` afterward if material still needs to change \
+             this late."
+        ),
+    }
+}
+
+/// Fields for one `data/provenance/events.yaml` entry -- see METADATA.md's
+/// field reference. `date` is always "now" and isn't a parameter.
+pub struct EventFields<'a> {
+    pub event_type: &'a str,
+    pub agent: &'a str,
+    pub collection: Option<&'a str>,
+    pub path: Option<&'a str>,
+    pub source: Option<&'a str>,
+    pub outcome: Option<&'a str>,
+    pub note: Option<&'a str>,
+}
+
+/// Append one entry to `data/provenance/events.yaml`, creating it with a
+/// short header if it doesn't exist yet. Shared by `ptc import` and
+/// `ptc redact` -- both log a batch/action against this append-only log
+/// (METADATA.md, ROADMAP.md item 10).
+pub fn append_event(root: &Path, fields: &EventFields) -> Result<()> {
+    let events_path = root.join("data").join("provenance").join("events.yaml");
+    let date = chrono::Utc::now().format("%Y-%m-%d");
+
+    let mut entry = format!(
+        "- date: \"{date}\"\n  type: {}\n  agent: \"{}\"\n",
+        fields.event_type,
+        escape_yaml_double_quoted(fields.agent)
+    );
+    if let Some(c) = fields.collection {
+        entry.push_str(&format!("  collection: {c}\n"));
+    }
+    if let Some(p) = fields.path {
+        entry.push_str(&format!("  path: \"{}\"\n", escape_yaml_double_quoted(p)));
+    }
+    if let Some(s) = fields.source {
+        entry.push_str(&format!("  source: \"{}\"\n", escape_yaml_double_quoted(s)));
+    }
+    if let Some(o) = fields.outcome {
+        entry.push_str(&format!(
+            "  outcome: \"{}\"\n",
+            escape_yaml_double_quoted(o)
+        ));
+    }
+    if let Some(n) = fields.note {
+        entry.push_str(&format!("  note: \"{}\"\n", escape_yaml_double_quoted(n)));
+    }
+
+    if events_path.exists() {
+        let mut existing = fs::read_to_string(&events_path)
+            .with_context(|| format!("reading {}", events_path.display()))?;
+        if !existing.ends_with('\n') {
+            existing.push('\n');
+        }
+        existing.push('\n');
+        existing.push_str(&entry);
+        fs::write(&events_path, existing)
+            .with_context(|| format!("writing {}", events_path.display()))
+    } else {
+        if let Some(parent) = events_path.parent() {
+            fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
+        }
+        let header = "# data/provenance/events.yaml -- see METADATA.md for the field reference:\n\
+                      # https://github.com/neodem/personal-time-capsule/blob/main/METADATA.md\n\n";
+        let contents = format!("{header}{entry}");
+        fs::write(&events_path, contents)
+            .with_context(|| format!("writing {}", events_path.display()))
+    }
+}
+
+/// Escape `"` and `\` for embedding in a double-quoted YAML scalar. Several
+/// event fields (`agent`, `source`, `outcome`, `note`) are free text a
+/// creator or another tool supplies, so this can't assume they're
+/// quote-free.
+fn escape_yaml_double_quoted(s: &str) -> String {
+    s.replace('\\', "\\\\").replace('"', "\\\"")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

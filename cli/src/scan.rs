@@ -37,6 +37,13 @@ pub struct Finding {
     /// A masked excerpt safe to print (e.g. `***-**-6789`), or `None` when
     /// no part of the match is safe to echo at all (a real credential).
     pub snippet: Option<String>,
+    /// Whether `ptc redact` can safely neutralize this finding on its own.
+    /// `false` only for a private key block header: the regex only spots
+    /// the `-----BEGIN...-----` line, not the multi-line key body that
+    /// follows, so "redacting" just that line would blank the label while
+    /// leaving the actual key material intact -- worse than not touching
+    /// it, since it would look handled. See `Detectors::redact_line`.
+    pub redactable: bool,
 }
 
 pub fn scan(root: &Path, collection: Option<&str>) -> Result<ScanReport> {
@@ -118,12 +125,12 @@ pub fn scan(root: &Path, collection: Option<&str>) -> Result<ScanReport> {
 /// sample means "not text." Cheap, no file-extension allowlist to keep in
 /// sync, and correctly skips the photos/audio/video that make up most of
 /// a real capsule's bytes.
-fn looks_binary(bytes: &[u8]) -> bool {
+pub(crate) fn looks_binary(bytes: &[u8]) -> bool {
     let sample = &bytes[..bytes.len().min(8000)];
     sample.contains(&0)
 }
 
-struct Detectors {
+pub(crate) struct Detectors {
     ssn: Regex,
     credit_card: Regex,
     aws_key: Regex,
@@ -132,7 +139,7 @@ struct Detectors {
 }
 
 impl Detectors {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Detectors {
             ssn: Regex::new(r"\b\d{3}-\d{2}-\d{4}\b").expect("valid hardcoded regex"),
             // 13-19 digits total, optionally grouped with spaces/dashes --
@@ -146,14 +153,23 @@ impl Detectors {
                 r"-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----",
             )
             .expect("valid hardcoded regex"),
+            // Group 2 captures just the secret value, not the "password: "
+            // label -- redact_line needs to replace only the value so the
+            // redacted line still reads sensibly (see below).
             credential_assignment: Regex::new(
-                r#"(?i)\b(api[_-]?key|secret|password|passwd|access[_-]?token)\b\s*[:=]\s*["']?[A-Za-z0-9_\-/+=]{8,}["']?"#,
+                r#"(?i)\b(?:api[_-]?key|secret|password|passwd|access[_-]?token)\b\s*[:=]\s*(["']?)([A-Za-z0-9_\-/+=]{8,})(["']?)"#,
             )
             .expect("valid hardcoded regex"),
         }
     }
 
-    fn scan_line(&self, path: &str, line_number: usize, line: &str, findings: &mut Vec<Finding>) {
+    pub(crate) fn scan_line(
+        &self,
+        path: &str,
+        line_number: usize,
+        line: &str,
+        findings: &mut Vec<Finding>,
+    ) {
         if let Some(m) = self.ssn.find(line) {
             findings.push(Finding {
                 path: path.to_string(),
@@ -161,6 +177,7 @@ impl Detectors {
                 category: "government-id",
                 description: "Possible SSN",
                 snippet: Some(mask_keep_last(m.as_str(), 4)),
+                redactable: true,
             });
         }
 
@@ -173,6 +190,7 @@ impl Detectors {
                     category: "financial",
                     description: "Possible credit card number (Luhn-valid)",
                     snippet: Some(mask_keep_last(&digits, 4)),
+                    redactable: true,
                 });
             }
         }
@@ -184,6 +202,7 @@ impl Detectors {
                 category: "credentials",
                 description: "Possible AWS access key ID",
                 snippet: None,
+                redactable: true,
             });
         }
 
@@ -194,6 +213,7 @@ impl Detectors {
                 category: "credentials",
                 description: "Private key block header",
                 snippet: None,
+                redactable: false,
             });
         }
 
@@ -204,9 +224,70 @@ impl Detectors {
                 category: "credentials",
                 description: "Possible credential assignment (password/api key/token)",
                 snippet: None,
+                redactable: true,
             });
         }
     }
+
+    /// Return `line` with every auto-redactable finding's matched span
+    /// replaced by `[REDACTED]`. A private key header is deliberately left
+    /// untouched (see `Finding::redactable`'s doc comment) -- callers
+    /// should still surface it via `scan_line`'s findings so a creator
+    /// knows to handle it by hand.
+    pub(crate) fn redact_line(&self, line: &str) -> RedactedLine {
+        let mut spans: Vec<(usize, usize, &'static str)> = Vec::new();
+
+        if let Some(m) = self.ssn.find(line) {
+            spans.push((m.start(), m.end(), "government-id"));
+        }
+        for m in self.credit_card.find_iter(line) {
+            let digits: String = m.as_str().chars().filter(char::is_ascii_digit).collect();
+            if luhn_valid(&digits) {
+                spans.push((m.start(), m.end(), "financial"));
+            }
+        }
+        if let Some(m) = self.aws_key.find(line) {
+            spans.push((m.start(), m.end(), "credentials"));
+        }
+        // Only the captured value (group 2) is replaced, not the
+        // "password: " label, so the redacted line still reads sensibly.
+        for caps in self.credential_assignment.captures_iter(line) {
+            if let Some(value) = caps.get(2) {
+                spans.push((value.start(), value.end(), "credentials"));
+            }
+        }
+
+        // Drop any span that overlaps one already kept (ascending by
+        // start), then apply replacements right-to-left so earlier,
+        // still-original byte offsets stay valid as `redacted` mutates.
+        spans.sort_by_key(|s| s.0);
+        let mut kept: Vec<(usize, usize, &'static str)> = Vec::new();
+        let mut last_end = 0usize;
+        for (start, end, category) in spans {
+            if start < last_end {
+                continue;
+            }
+            last_end = end;
+            kept.push((start, end, category));
+        }
+
+        let mut redacted = line.to_string();
+        for (start, end, _) in kept.iter().rev() {
+            redacted.replace_range(*start..*end, "[REDACTED]");
+        }
+
+        RedactedLine {
+            text: redacted,
+            categories: kept.into_iter().map(|(_, _, c)| c).collect(),
+        }
+    }
+}
+
+pub(crate) struct RedactedLine {
+    pub text: String,
+    /// One entry per span actually replaced on this line, in left-to-right
+    /// order. Empty means nothing on this line was auto-redactable.
+    pub categories: Vec<&'static str>,
 }
 
 /// Replace every character except the last `keep` with `*`, preserving

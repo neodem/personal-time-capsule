@@ -90,7 +90,7 @@ Creators and future tooling are free to use other category strings; these six ju
 
 ## What's deliberately out of scope here
 
-- **Redaction mechanics.** *Whether* an item is redacted, and how a redacted copy relates to its original (kept alongside in a stricter zone? overwritten entirely?), is `LIFECYCLE.md` stage 4's job to describe and `ROADMAP.md` item 25 (`ptc redact`) to implement — this document only covers *classifying* an item's privacy zone, not modifying its content.
+- **Redaction mechanics.** *Whether* an item is redacted is still this document's `privacy_zone`/`release_policy` concern, not modifying content — but *how* a redacted copy relates to its original is `ROADMAP.md` item 25 (`ptc redact`, see `cli/README.md`), and it's now built: it overwrites the target file in place, with no automatic backup copy -- the safety net is a dry run by default plus an explicit `--apply` to commit, not a hidden file. A creator who wants an undo path keeps their own copy or uses version control before applying.
 - **Automated scanning itself.** `ROADMAP.md` item 24 (`ptc scan`, see `cli/README.md`) is the Phase 4 tooling that actually detects candidate SSNs, credit card numbers, and credentials via regex, and it's report-only by design -- it never writes here itself. This document only defines where a scan's *findings*, once a creator reviews and confirms them, get recorded.
 
 ## Open questions
