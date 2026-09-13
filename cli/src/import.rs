@@ -1,8 +1,9 @@
 //! `ptc import` -- LIFECYCLE.md stage 2. Copies raw records (a file or a
 //! whole directory tree) into `data/<collection>/`, registers the
 //! collection in `capsule.yaml` if it isn't already declared, and appends
-//! an `import` event to `data/provenance/events.yaml` (METADATA.md,
-//! ROADMAP.md item 10).
+//! an `import` event -- including the batch's actual destination `path`,
+//! not just its free-text `source` description -- to
+//! `data/provenance/events.yaml` (METADATA.md, ROADMAP.md item 10).
 //!
 //! ROADMAP.md item 22.
 
@@ -68,13 +69,25 @@ pub fn import(
         model::patch_lifecycle_stage(&capsule_yaml_path, "import")?;
     }
 
+    let destination_rel = destination_root(source, &collection_dir)?
+        .strip_prefix(root)
+        .with_context(|| format!("computing a path relative to {}", root.display()))?
+        .to_string_lossy()
+        .replace('\\', "/");
+
     let agent = agent
         .map(str::to_string)
         .unwrap_or_else(|| format!("ptc CLI v{}", env!("CARGO_PKG_VERSION")));
     let source_description = source_description
         .map(str::to_string)
         .unwrap_or_else(|| format!("Copied from {}", source.display()));
-    append_import_event(root, collection, &source_description, &agent)?;
+    append_import_event(
+        root,
+        collection,
+        &destination_rel,
+        &source_description,
+        &agent,
+    )?;
 
     Ok(ImportSummary {
         files_copied,
@@ -151,25 +164,27 @@ fn copy_into_collection(source: &Path, collection_dir: &Path) -> Result<(usize, 
     Ok((files_copied, bytes_copied))
 }
 
-/// A directory source is nested under its own name inside the collection
-/// (`data/photos/1945/img.jpg`, not a flattened `data/photos/img.jpg`) --
+/// Where a source lands under a collection: a single file goes directly
+/// under `collection_dir`, while a directory is nested under its own name
+/// (`data/photos/1945/`, not flattened straight into `data/photos/`) --
 /// otherwise re-importing several same-named-file source directories into
 /// one collection (e.g. a "1945" and a "1946" photo folder both going into
 /// "photos") would silently collide or lose which folder a file came from.
-/// A single-file source has no such structure to preserve and lands
-/// directly under the collection.
-fn plan_copy(source: &Path, collection_dir: &Path) -> Result<Vec<(PathBuf, PathBuf)>> {
-    if source.is_file() {
-        let file_name = source
-            .file_name()
-            .with_context(|| format!("{} has no file name", source.display()))?;
-        return Ok(vec![(source.to_path_buf(), collection_dir.join(file_name))]);
-    }
-
-    let source_name = source
+/// Shared by `plan_copy` (to know where to write) and `import` (to record
+/// where a batch landed in the provenance event).
+fn destination_root(source: &Path, collection_dir: &Path) -> Result<PathBuf> {
+    let name = source
         .file_name()
-        .with_context(|| format!("{} has no directory name", source.display()))?;
-    let dest_root = collection_dir.join(source_name);
+        .with_context(|| format!("{} has no file/directory name", source.display()))?;
+    Ok(collection_dir.join(name))
+}
+
+fn plan_copy(source: &Path, collection_dir: &Path) -> Result<Vec<(PathBuf, PathBuf)>> {
+    let dest_root = destination_root(source, collection_dir)?;
+
+    if source.is_file() {
+        return Ok(vec![(source.to_path_buf(), dest_root)]);
+    }
 
     let mut pairs = Vec::new();
     for entry in WalkDir::new(source) {
@@ -186,14 +201,21 @@ fn plan_copy(source: &Path, collection_dir: &Path) -> Result<Vec<(PathBuf, PathB
     Ok(pairs)
 }
 
-fn append_import_event(root: &Path, collection: &str, source: &str, agent: &str) -> Result<()> {
+fn append_import_event(
+    root: &Path,
+    collection: &str,
+    destination_rel: &str,
+    source: &str,
+    agent: &str,
+) -> Result<()> {
     let events_path = root.join("data").join("provenance").join("events.yaml");
     let date = Utc::now().format("%Y-%m-%d");
+    let path_escaped = escape_yaml_double_quoted(destination_rel);
     let source_escaped = escape_yaml_double_quoted(source);
     let agent_escaped = escape_yaml_double_quoted(agent);
 
     let entry = format!(
-        "- date: \"{date}\"\n  type: import\n  agent: \"{agent_escaped}\"\n  collection: {collection}\n  source: \"{source_escaped}\"\n"
+        "- date: \"{date}\"\n  type: import\n  agent: \"{agent_escaped}\"\n  collection: {collection}\n  path: \"{path_escaped}\"\n  source: \"{source_escaped}\"\n"
     );
 
     if events_path.exists() {
@@ -292,6 +314,7 @@ mod tests {
             fs::read_to_string(root.join("data").join("provenance").join("events.yaml")).unwrap();
         assert!(events_text.contains("type: import"));
         assert!(events_text.contains("collection: photos"));
+        assert!(events_text.contains(r#"path: "data/photos/photo.jpg""#));
     }
 
     #[test]
@@ -356,6 +379,14 @@ mod tests {
             .join("1946")
             .join("img0001.jpg")
             .exists());
+
+        // Each batch's provenance event records exactly where it landed,
+        // so the two years stay distinguishable in the log even though
+        // both share the "photos" collection.
+        let events_text =
+            fs::read_to_string(root.join("data").join("provenance").join("events.yaml")).unwrap();
+        assert!(events_text.contains(r#"path: "data/photos/1945""#));
+        assert!(events_text.contains(r#"path: "data/photos/1946""#));
     }
 
     #[test]

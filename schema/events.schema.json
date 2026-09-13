@@ -41,6 +41,10 @@
           "type": "string",
           "description": "Optional. When an event pertains to one named collection rather than the whole capsule, this should match a collections[].name entry in capsule.yaml."
         },
+        "path": {
+          "type": "string",
+          "description": "Optional. For import events, the destination this batch actually landed at, relative to the bag root -- a single file (e.g. \"data/photos/photo.jpg\") or, when a whole directory was imported, the subfolder it was nested under (e.g. \"data/photos/1945\"). Lets a collection assembled from several distinct import batches (e.g. one photo folder per year) be traced back to which batch a given file came from, beyond the coarser collection field above."
+        },
         "source": {
           "type": "string",
           "description": "Optional. Free-text provenance description — primarily for import events, e.g. \"Gmail Takeout export, jane@example.org\"."
