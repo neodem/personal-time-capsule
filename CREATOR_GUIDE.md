@@ -37,6 +37,8 @@ Roughly, in the order you'd do it:
 
 You can go back and add to, revise, or reorganize a capsule at any point before you lock it. Nothing about this has to happen all at once, and a capsule you never lock or hand off is still a legitimate personal archive — you don't have to finish stage 6 for stages 1–4 to be worthwhile.
 
+You also don't have to do this only once. Locking and handing off a capsule doesn't mean you're done adding to your own history — you can start a new one later that picks up where the last one left off, whenever you have enough new material to make that worthwhile. Doing this every several years, rather than waiting for one single archive that feels completely finished, actually gets more of your life to safety sooner, since nothing is protected by redundant, independently-held copies until it's locked and handed off. If you do this, mention the earlier capsule in the new one — there's a field for it in the technical spec (`series`) — so whoever eventually holds both knows they belong together.
+
 ## What's real today, and what isn't yet
 
 Being straight about this: **this project is still being designed.** There is a written specification in progress and one small, experimental piece of software (`ptc init`, which only scaffolds an empty capsule skeleton — see [`cli/README.md`](./cli/README.md)). There is not yet a way to actually walk through the six steps above end-to-end. [`ROADMAP.md`](./ROADMAP.md) tracks exactly what's done and what isn't, item by item, if you want the specifics.

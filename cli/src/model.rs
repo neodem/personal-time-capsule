@@ -25,6 +25,8 @@ pub struct Capsule {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub purpose: Option<Purpose>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub series: Option<Series>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub collections: Option<Vec<Collection>>,
     pub access: Access,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -65,6 +67,19 @@ pub struct Purpose {
     pub description: Option<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, yaml_serde::Value>,
+}
+
+/// Optional, empty on almost every capsule -- FORMAT.md's `series` section
+/// (ROADMAP.md item 8a). Deliberately one-directional (`continues` only,
+/// never a forward-pointing `continued_by`) and deliberately not a merge
+/// mechanism -- see that section for why.
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Series {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub continues: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

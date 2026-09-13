@@ -26,6 +26,18 @@ purpose:
     email, photographs, writing, and home video from 1995 onward —
     for descendants and future historians.
 
+# Optional — most capsules are a creator's only one, and this one (Jane's
+# first) doesn't actually use it. Shown here for reference: if Jane later
+# makes a second capsule picking up where this one leaves off, THAT
+# capsule's series.continues would name THIS capsule's own id above.
+# One-directional only — see FORMAT.md — so this capsule itself has no
+# "continued_by" field pointing forward to a successor that may not even
+# exist yet.
+#
+# series:
+#   continues: "urn:uuid:<an earlier capsule's own id>"
+#   note: "Picks up where the earlier capsule left off; covers 2026 onward."
+
 # Named groupings of payload content under data/. A collection with no
 # privacy_zone/release_policy simply inherits the capsule-wide default
 # declared under `access` below — only declare an override here.

@@ -113,6 +113,14 @@ The beneficiary — named individuals, an institution, or the public, per the cr
 - **Notable:** access doesn't have to be all-or-nothing if the creator set different policies per collection (`README.md`) — a "never-release" privacy zone, for instance, may never reach this stage even after everything else does.
 - **Exit condition:** none — this is the terminal, intended-to-be-permanent state. The capsule continues to sit with its custodian(s) under ordinary preservation practice indefinitely.
 
+## Multiple capsules over a lifetime
+
+Nothing above requires a creator to have exactly one capsule, ever. The amend loop (stages 1–4) lets a single capsule grow indefinitely before sealing, but sealing and deposit are what actually get material to safety — LOCKSS-style redundancy across custodians (`THREAT_MODEL.md` #1) doesn't start until then. Waiting to seal until an archive feels "finished" risks holding everything hostage to that feeling for years or decades, which is exactly the kind of loss `THREAT_MODEL.md` already worries about.
+
+A creator can instead seal and deposit a capsule, then originate a new one later that picks up where it left off — `capsule.yaml`'s optional `series.continues` field (`FORMAT.md`, `ROADMAP.md` item 8a) names the earlier capsule's own `id`, so a custodian or future researcher can walk the chain. This is deliberately one-directional: a capsule can only reference an earlier, already-sealed capsule's known `id`, never a later one, since the earlier capsule's `capsule.yaml` is frozen forever once sealed (`INTEGRITY.md`) — there's no mechanism to retroactively add a forward-pointing reference to it. A series is read backward from the newest capsule, not forward from an index the first one couldn't have known to include.
+
+This deliberately doesn't define a mechanism for merging multiple capsules into one — see `FORMAT.md`'s `series` section for why that's a much harder problem (reconciling collection names, custody chains, and independently-split encryption keys across two independently-sealed bags) than simply linking them for a reader's benefit.
+
 ## Status
 
 First pass, written during Phase 1 (Definition) alongside `THREAT_MODEL.md` and `ACTORS.md`. The amend loop, succession events, and multi-collection/staged release are the parts most likely to need real structure once Phase 2 (Specification) defines `capsule.yaml` and the metadata model.
