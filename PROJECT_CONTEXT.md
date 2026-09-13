@@ -45,7 +45,7 @@ Full framing lives in `README.md`, `VISION.md`, and `PRINCIPLES.md` at repo root
 
 ## Working style / workflow preferences
 
-- Changes go through a **feature branch + PR**, not direct pushes to `main`. This has been the actual pattern used (PRs #1–18 so far) — keep doing it, including for `cli/` code changes, not just docs.
+- Changes go through a **feature branch + PR**, not direct pushes to `main`. This has been the actual pattern used (PRs #1–19 so far) — keep doing it, including for `cli/` code changes, not just docs.
 - The user is non-technical-by-trade but hands-on; explain tradeoffs plainly, don't assume deep git/crypto background.
 - The project is explicitly meant to be developed **in public** — docs should read as if archivists/historians/lawyers may be watching and are invited to disagree.
 - Keep tone of docs matter-of-fact and a little idealistic, not corporate/marketing.
