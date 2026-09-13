@@ -109,6 +109,38 @@ fn build_cipher(key: &[u8]) -> Result<XChaCha20Poly1305> {
     Ok(XChaCha20Poly1305::new(&key))
 }
 
+/// Lowercase hex, no separators -- the form `ptc encrypt --apply` prints a
+/// unit's key in and `ptc unlock --key` expects it back in, since there's
+/// no SLIP-0039 splitting yet to hand the key to trustees in encoded
+/// mnemonic form (see this module's and `encrypt.rs`'s doc comments).
+pub fn to_hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// The inverse of `to_hex`. Rejects anything that isn't an even number of
+/// valid hex digits rather than silently truncating or padding -- a typo'd
+/// key should fail loudly here, not produce a `Cipher::decrypt` failure
+/// that looks identical to "wrong key."
+pub fn from_hex(s: &str) -> Result<Vec<u8>> {
+    let s = s.trim();
+    if s.is_empty() {
+        bail!("key is empty");
+    }
+    if !s.len().is_multiple_of(2) {
+        bail!(
+            "key must have an even number of hex characters, got {}",
+            s.len()
+        );
+    }
+    (0..s.len())
+        .step_by(2)
+        .map(|i| {
+            u8::from_str_radix(&s[i..i + 2], 16)
+                .map_err(|_| anyhow!("invalid hex character(s) in key near position {i}"))
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -166,5 +198,26 @@ mod tests {
         let cipher = default_cipher();
         let short_key = vec![0u8; 16];
         assert!(cipher.encrypt(&short_key, b"secret").is_err());
+    }
+
+    #[test]
+    fn to_hex_and_from_hex_round_trip_a_generated_key() {
+        let cipher = default_cipher();
+        let key = cipher.generate_key();
+        let hex = to_hex(&key);
+        assert_eq!(hex.len(), key.len() * 2);
+        assert_eq!(from_hex(&hex).unwrap(), key);
+    }
+
+    #[test]
+    fn from_hex_trims_whitespace() {
+        assert_eq!(from_hex("  0a1b  \n").unwrap(), vec![0x0a, 0x1b]);
+    }
+
+    #[test]
+    fn from_hex_rejects_odd_length_and_invalid_characters() {
+        assert!(from_hex("abc").is_err());
+        assert!(from_hex("zz").is_err());
+        assert!(from_hex("").is_err());
     }
 }
