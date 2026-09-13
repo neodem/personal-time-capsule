@@ -10,5 +10,6 @@
 
 pub mod checksum;
 pub mod import;
+pub mod inspect;
 pub mod model;
 pub mod seal;
