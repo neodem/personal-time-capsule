@@ -61,17 +61,19 @@ This also clarifies what `manifest-sha256.txt` actually means for an encrypted c
 
 ## What's deliberately out of scope here
 
-- **Implementation.** `ptc encrypt` and `ptc unlock` (`ROADMAP.md` items 26, 28) don't exist yet — this document specifies what they need to produce, not how they're built.
+- **Key-splitting implementation.** `ptc encrypt` (`ROADMAP.md` item 26) exists — real XChaCha20-Poly1305 payload encryption, one key per unit — but it does not implement the SLIP-0039 splitting this document calls for. No solid, actively-maintained Rust SLIP-0039 crate exists as of this writing: the one real implementation, `sssmc39`, is unmaintained, pre-1.0, and self-described as a work-in-progress (last touched 2020); the other, `slip39`, is GPL-3.0-or-later, license-incompatible with this project's Apache-2.0 code. Until that's resolved, `ptc encrypt --apply` prints each unit's raw key directly and the creator is responsible for recording and distributing it themselves — see `cli/README.md`. `ptc unlock` (item 28) doesn't exist yet either.
 - **Passphrase guidance for share protection.** Left to the creator and trustees; future tooling can prompt for one without this spec mandating it.
 - **Item-level cryptographic isolation.** See "Encryption granularity," above — a known, named gap, not a solved problem.
 - **A formal ciphertext-fixity file format.** Deferred to each custodian's own recordkeeping, per `INTEGRITY.md`'s existing framework — SHA-256 doesn't care whether bytes are plaintext or ciphertext, so no new mechanism is needed for a custodian to track "has what I hold changed," only documentation that they may need to (see above).
 
 ## Open questions
 
+- **No solid Rust SLIP-0039 crate exists.** See "What's deliberately out of scope," above. Revisit once the crate ecosystem improves, or treat "implement SLIP-0039 from scratch, carefully, with real review" as its own deliberately-scoped future item rather than something to rush into `ptc encrypt`.
 - **Item-level cryptographic isolation isn't solved**, only named — see "Encryption granularity." Revisit if real capsules show this is more than a theoretical gap.
 - **Whether the spec should eventually *recommend* (not require) passphrase-protected shares** as a default rather than leaving it silent — currently just left to the creator.
 - **SLIP-0039's group-of-groups structure is unused.** Fine for now (this project only needs simple *k*-of-*n*), but worth remembering it's available without a format change if `ROADMAP.md` item 15 (custody/succession model) ever wants more elaborate trustee structures (e.g. "any 1 of 3 lawyers, OR 2 of 3 family members").
+- **`ptc encrypt` never updates `capsule.yaml`.** `INTEGRITY.md` says `capsule.yaml` stays frozen forever once sealed, with no defined mechanism to amend it afterward (`reseal` covers `manifest-sha256.txt` only). So `capsule.yaml`'s own `encryption.status` / `collections[].encryption.status` fields describe intent as of sealing time only, never updated to reflect that encryption actually happened later — the real record lives entirely in `preservation-log.yaml`. Worth a clearer cross-reference between this document, `FORMAT.md`, and `INTEGRITY.md` about what those status fields mean now that there's real tooling to reconcile against.
 
 ## Status
 
-First pass, written during Phase 2 (Specification), addressing [`ROADMAP.md`](./ROADMAP.md) item 13. Still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md) — this is the document on this project most in need of review by an actual cryptographer; the reasoning here is careful but not expert-audited.
+First pass, written during Phase 2 (Specification), addressing [`ROADMAP.md`](./ROADMAP.md) item 13. `ptc encrypt` (item 26) has since implemented the cipher half in `cli/`, built around a `Cipher` trait specifically so a future `spec_version` bump to a different algorithm doesn't mean rewriting its file-walking/key-management logic — see `cli/src/cipher.rs`. The SLIP-0039 half remains unimplemented pending a real Rust crate (see "What's deliberately out of scope"). Still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md) — this is the document on this project most in need of review by an actual cryptographer; the reasoning here is careful but not expert-audited.

@@ -1,6 +1,7 @@
 use anyhow::{bail, Context, Result};
 use chrono::Utc;
 use clap::{Parser, Subcommand};
+use ptc::encrypt::{encrypt, EncryptSummary};
 use ptc::import::{import, ImportSummary};
 use ptc::inspect::{inspect, InspectReport};
 use ptc::model::{
@@ -41,6 +42,11 @@ enum Command {
     /// Seal a capsule: compute manifest-sha256.txt / tagmanifest-sha256.txt,
     /// write bag-info.txt, and mark status.lifecycle_stage as "sealing".
     Seal(SealArgs),
+    /// Encrypt a freshly sealed capsule's non-immediate-release payload,
+    /// one key per collection. Dry run by default -- pass --apply to
+    /// actually encrypt. Key-splitting (SLIP-0039) is not implemented yet;
+    /// --apply prints each unit's raw key for the creator to record.
+    Encrypt(EncryptArgs),
 }
 
 #[derive(clap::Args)]
@@ -133,6 +139,18 @@ struct SealArgs {
     path: PathBuf,
 }
 
+#[derive(clap::Args)]
+struct EncryptArgs {
+    /// Path to the capsule directory to encrypt. Must already be sealed.
+    path: PathBuf,
+
+    /// Actually encrypt. Without this, ptc encrypt only reports which
+    /// units would be encrypted and how many files each has, without
+    /// generating any keys or touching any files.
+    #[arg(long)]
+    apply: bool,
+}
+
 fn main() {
     if let Err(err) = run() {
         eprintln!("error: {err:#}");
@@ -149,6 +167,7 @@ fn run() -> Result<()> {
         Command::Scan(args) => cmd_scan(&args),
         Command::Redact(args) => cmd_redact(&args),
         Command::Seal(args) => cmd_seal(&args),
+        Command::Encrypt(args) => cmd_encrypt(&args),
     }
 }
 
@@ -669,6 +688,67 @@ fn cmd_seal(args: &SealArgs) -> Result<()> {
     println!("capsule.yaml's status.lifecycle_stage is now \"sealing\". Any");
     println!("change to data/ or the sealed tag files after this point should");
     println!("be treated as suspect -- re-verify against these manifests.");
+
+    Ok(())
+}
+
+fn cmd_encrypt(args: &EncryptArgs) -> Result<()> {
+    let EncryptSummary {
+        units,
+        skipped_immediate,
+    } = encrypt(&args.path, args.apply)?;
+
+    if !args.apply {
+        println!("Dry run -- nothing was encrypted, no keys were generated.");
+        println!();
+    }
+
+    for u in &units {
+        if u.already_encrypted {
+            println!(
+                "{:<12} ({}): already encrypted -- nothing to do.",
+                u.name, u.path
+            );
+            continue;
+        }
+        if args.apply {
+            println!(
+                "{:<12} ({}): {} file(s) encrypted.",
+                u.name, u.path, u.files_encrypted
+            );
+            let key_hex = u
+                .key_hex
+                .as_deref()
+                .expect("apply always issues a key for a newly-encrypted unit");
+            println!("  KEY (xchacha20-poly1305, 256-bit, hex) -- RECORD THIS NOW, IT WILL NOT BE SHOWN AGAIN:");
+            println!("  {key_hex}");
+            println!(
+                "  SLIP-0039 key-splitting is not implemented yet (see cli/README.md) -- \
+                 you are responsible for recording and distributing this key yourself."
+            );
+        } else {
+            println!(
+                "{:<12} ({}): {} file(s) would be encrypted.",
+                u.name, u.path, u.files_encrypted
+            );
+        }
+    }
+
+    for name in &skipped_immediate {
+        println!("{name:<12}: release_policy is immediate -- skipped, never encrypted.");
+    }
+
+    println!();
+    if args.apply {
+        let encrypted_count = units.iter().filter(|u| !u.already_encrypted).count();
+        if encrypted_count > 0 {
+            println!("Logged {encrypted_count} encryption event(s) in preservation-log.yaml.");
+        } else {
+            println!("Nothing new to encrypt.");
+        }
+    } else {
+        println!("Re-run with --apply to actually encrypt.");
+    }
 
     Ok(())
 }

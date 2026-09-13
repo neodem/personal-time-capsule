@@ -88,6 +88,7 @@ pub fn redact(root: &Path, target: &str, apply: bool) -> Result<RedactSummary> {
             let outcome = format!("{redactions_applied} redaction(s) applied by ptc redact");
             model::append_event(
                 root,
+                model::EventLog::Provenance,
                 &model::EventFields {
                     event_type: "screening",
                     agent: &format!("ptc CLI v{}", env!("CARGO_PKG_VERSION")),

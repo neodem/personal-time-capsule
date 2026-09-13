@@ -14,7 +14,7 @@
 use anyhow::{bail, Context, Result};
 use std::collections::BTreeMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub const SPEC_VERSION: &str = "PTC-0.1";
 
@@ -401,7 +401,48 @@ pub fn ensure_pre_seal_stage(stage: LifecycleStage) -> Result<()> {
     }
 }
 
-/// Fields for one `data/provenance/events.yaml` entry -- see METADATA.md's
+/// Which append-only event log to write to -- `data/provenance/events.yaml`
+/// (pre-seal history, METADATA.md) or `preservation-log.yaml` (post-seal
+/// history, INTEGRITY.md). The two share the same entry shape, but live at
+/// different paths, get different first-write headers, and -- critically
+/// -- have different relationships to sealing: `events.yaml` is payload,
+/// frozen at sealing like everything else under `data/`; `preservation-log.yaml`
+/// is a deliberately unsealed tag file, excluded from both manifests,
+/// specifically so post-seal events (encryption, deposit, fixity checks,
+/// ...) have somewhere honest to be recorded once `capsule.yaml` itself is
+/// frozen. Never conflate which one a given event type belongs in -- see
+/// each document's own "Event types" section.
+pub enum EventLog {
+    Provenance,
+    Preservation,
+}
+
+impl EventLog {
+    fn path(&self, root: &Path) -> PathBuf {
+        match self {
+            EventLog::Provenance => root.join("data").join("provenance").join("events.yaml"),
+            EventLog::Preservation => root.join("preservation-log.yaml"),
+        }
+    }
+
+    fn header(&self) -> &'static str {
+        match self {
+            EventLog::Provenance => {
+                "# data/provenance/events.yaml -- see METADATA.md for the field reference:\n\
+                 # https://github.com/neodem/personal-time-capsule/blob/main/METADATA.md\n\n"
+            }
+            EventLog::Preservation => {
+                "# preservation-log.yaml -- see INTEGRITY.md for the field reference. NOT\n\
+                 # covered by manifest-sha256.txt or tagmanifest-sha256.txt -- see INTEGRITY.md\n\
+                 # for why this file, unlike capsule.yaml, is expected to keep changing after\n\
+                 # sealing:\n\
+                 # https://github.com/neodem/personal-time-capsule/blob/main/INTEGRITY.md\n\n"
+            }
+        }
+    }
+}
+
+/// Fields for one event-log entry -- see METADATA.md's (or INTEGRITY.md's)
 /// field reference. `date` is always "now" and isn't a parameter.
 pub struct EventFields<'a> {
     pub event_type: &'a str,
@@ -413,12 +454,13 @@ pub struct EventFields<'a> {
     pub note: Option<&'a str>,
 }
 
-/// Append one entry to `data/provenance/events.yaml`, creating it with a
-/// short header if it doesn't exist yet. Shared by `ptc import` and
-/// `ptc redact` -- both log a batch/action against this append-only log
-/// (METADATA.md, ROADMAP.md item 10).
-pub fn append_event(root: &Path, fields: &EventFields) -> Result<()> {
-    let events_path = root.join("data").join("provenance").join("events.yaml");
+/// Append one entry to whichever event log `log` names, creating it with a
+/// short header if it doesn't exist yet. Shared by `ptc import`/`ptc redact`
+/// (both log against `data/provenance/events.yaml`) and `ptc encrypt`
+/// (logs against `preservation-log.yaml`, since encryption is a post-seal
+/// event -- see `EventLog`'s own doc comment).
+pub fn append_event(root: &Path, log: EventLog, fields: &EventFields) -> Result<()> {
+    let events_path = log.path(root);
     let date = chrono::Utc::now().format("%Y-%m-%d");
 
     let mut entry = format!(
@@ -459,9 +501,7 @@ pub fn append_event(root: &Path, fields: &EventFields) -> Result<()> {
         if let Some(parent) = events_path.parent() {
             fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
         }
-        let header = "# data/provenance/events.yaml -- see METADATA.md for the field reference:\n\
-                      # https://github.com/neodem/personal-time-capsule/blob/main/METADATA.md\n\n";
-        let contents = format!("{header}{entry}");
+        let contents = format!("{}{entry}", log.header());
         fs::write(&events_path, contents)
             .with_context(|| format!("writing {}", events_path.display()))
     }
