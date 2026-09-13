@@ -543,6 +543,7 @@ mod tests {
                 creator: None,
             },
             purpose: None,
+            series: None,
             collections: None,
             access: Access {
                 default_privacy_zone: PrivacyZone::Restricted,
@@ -576,6 +577,41 @@ mod tests {
             ReleasePolicyType::Custom
         );
         assert_eq!(parsed.status.lifecycle_stage, LifecycleStage::Origination);
+    }
+
+    #[test]
+    fn series_field_round_trips_and_is_absent_by_default() {
+        let mut capsule = minimal_capsule();
+        assert!(capsule.series.is_none());
+
+        capsule.series = Some(Series {
+            continues: Some("urn:uuid:earlier-capsule".to_string()),
+            note: Some("picks up where the earlier one left off".to_string()),
+        });
+        let yaml = yaml_serde::to_string(&capsule).expect("serialize");
+        assert!(
+            yaml.contains("series:"),
+            "expected a series: block; got:\n{yaml}"
+        );
+
+        let parsed: Capsule = yaml_serde::from_str(&yaml).expect("deserialize");
+        let series = parsed.series.expect("series should round-trip");
+        assert_eq!(
+            series.continues.as_deref(),
+            Some("urn:uuid:earlier-capsule")
+        );
+        assert_eq!(
+            series.note.as_deref(),
+            Some("picks up where the earlier one left off")
+        );
+
+        // Absent by default -- serializing minimal_capsule() shouldn't emit
+        // a series: key at all (skip_serializing_if).
+        let minimal_yaml = yaml_serde::to_string(&minimal_capsule()).expect("serialize");
+        assert!(
+            !minimal_yaml.contains("series:"),
+            "series should be omitted when None; got:\n{minimal_yaml}"
+        );
     }
 
     #[test]

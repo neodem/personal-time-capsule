@@ -302,6 +302,7 @@ mod tests {
                 creator: None,
             },
             purpose: None,
+            series: None,
             collections,
             access: Access {
                 default_privacy_zone: PrivacyZone::Public,

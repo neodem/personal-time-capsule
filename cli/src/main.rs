@@ -385,6 +385,7 @@ fn build_new_capsule(args: &InitArgs) -> Capsule {
             creator,
         },
         purpose,
+        series: None,
         collections: None,
         access: Access {
             // Defaulted to the more conservative zone; the creator edits this
