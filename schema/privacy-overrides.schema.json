@@ -14,7 +14,7 @@
         "path": {
           "type": "string",
           "minLength": 1,
-          "description": "Exact path to a single payload file, relative to the bag root (e.g. \"data/email/2011-03-02-medical-bill.eml\"). No wildcards or directory matching in this version — see PRIVACY.md's open questions."
+          "description": "Relative to the bag root, one of three forms: an exact file path (\"data/email/2011-03-02-medical-bill.eml\"), a directory prefix ending in \"/\" matching every file under it recursively (\"data/email/2003/\"), or a glob pattern containing \"*\"/\"**\"/\"?\" (\"data/email/2003-*.eml\", \"data/photos/**/*.jpg\"). See PRIVACY.md's \"Path matching\" section for exact semantics and precedence when more than one entry matches the same file."
         },
         "privacy_zone": {
           "type": "string",

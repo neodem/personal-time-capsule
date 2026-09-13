@@ -8,7 +8,7 @@ Phase 2 (Specification) — [`ROADMAP.md`](./ROADMAP.md) item 12: per-item priva
 
 ## `privacy-overrides.yaml`
 
-A new root-level tag file, alongside `capsule.yaml` — **one consolidated list for the whole capsule**, not scattered per-collection sidecar files, so a creator (or a future auditor) can see every exception to the default in one place rather than having to check every collection directory individually. Each entry names one file, relative to the bag root, and what's different about it.
+A new root-level tag file, alongside `capsule.yaml` — **one consolidated list for the whole capsule**, not scattered per-collection sidecar files, so a creator (or a future auditor) can see every exception to the default in one place rather than having to check every collection directory individually. Each entry names one file, directory, or glob pattern (see "Path matching," below), relative to the bag root, and what's different about it.
 
 It's **sparse by design**: only items that *differ* from their collection's (or the capsule's default) zone need an entry. A 4,000-message email export with 12 flagged messages needs 12 entries, not 4,000 — the same "don't force exhaustive per-item cataloging" reasoning `METADATA.md` already applied to the event log.
 
@@ -20,7 +20,7 @@ It's **recommended, not required** — a capsule where screening surfaced zero e
 
 | Field | Required | Description |
 |---|---|---|
-| `path` | yes | Exact path to one payload file, relative to the bag root (e.g. `"data/email/2011-03-02-medical-bill.eml"`). No wildcards or directory-level matching in this version — see Open questions. |
+| `path` | yes | Which payload file(s) this override applies to, relative to the bag root — an exact file, a directory prefix, or a glob pattern. See "Path matching," below. |
 | `privacy_zone` | no | Overrides this item's zone. Same vocabulary as `capsule.yaml`: `public` / `restricted` / `never-release`. |
 | `release_policy` | no | Overrides this item's release timing independently of `privacy_zone` — same shape as `capsule.yaml`'s release policy. Lets one item release later (or earlier) than the rest of its collection without also changing whether it's public/restricted/never. |
 | `category` | no | Free text — see "Sensitive-data-scanning categories," below. |
@@ -28,6 +28,16 @@ It's **recommended, not required** — a capsule where screening surfaced zero e
 | `flagged_by` | no | Free text: who or what identified the need for this override (`"Jane Smith (creator)"`, `"ptc scan v0.1 (creator-confirmed)"`) — same convention as `data/provenance/events.yaml`'s `agent` field. |
 
 An entry can set `privacy_zone`, `release_policy`, or both — a photo that should simply release sooner than its collection doesn't need a zone change to justify a release-timing override.
+
+### Path matching
+
+`path` is interpreted as one of three forms, chosen by its shape — no separate field needed to say which:
+
+1. **Exact file** — a plain path with no trailing `/` and no wildcard characters (`data/email/2011-03-02-medical-bill.eml`). Matches exactly that one file. This was the only form in the original version of this document.
+2. **Directory prefix** — a path ending in `/` (`data/email/2003/`). Matches every file whose path starts with that prefix, at any depth — the whole subtree, not just its immediate children. This is the case `ptc import` itself now creates naturally: a directory source lands nested under its own name (`data/photos/1945/`, `data/photos/1946/`, ...; see `ROADMAP.md` item 22), and a creator who decides an entire imported batch needs the same privacy treatment can write one override for it instead of one per file.
+3. **Glob pattern** — a path containing `*`, `**`, or `?` (`data/email/2003-*.eml`, `data/photos/**/*.jpg`). Standard shell-glob semantics: `*` matches any run of characters within one path segment, `**` matches across segments (any depth, like the directory-prefix form but usable mid-path), `?` matches exactly one character.
+
+**Precedence when more than one entry matches the same file: the entry appearing *later* in `privacy-overrides.yaml` wins** — the same last-match-wins convention `.gitignore` uses, rather than trying to rank exact/directory/glob forms by some notion of specificity. A creator who wants a narrow exception to a broader rule (a whole year restricted, except one harmless message) lists the narrow, exact-file override *after* the broad one. See the worked example below.
 
 ### Worked example
 
@@ -50,6 +60,17 @@ An entry can set `privacy_zone`, `release_policy`, or both — a photo that shou
     type: immediate
   reason: "Already public elsewhere; no reason to hold back with the rest of the photos collection"
   flagged_by: "Jane Smith (creator)"
+
+- path: data/email/2003/
+  privacy_zone: restricted
+  category: third-party-privacy
+  reason: "Correspondence with an ex-partner who never consented to being archived; restricting the whole imported year is faster and safer than screening message-by-message"
+  flagged_by: "Jane Smith (creator)"
+
+- path: data/email/2003/2003-11-02-happy-birthday.eml
+  privacy_zone: public
+  reason: "One harmless birthday message from that year — listed after the directory-prefix rule above, so this exact-path entry wins for this one file"
+  flagged_by: "Jane Smith (creator)"
 ```
 
 ## Sensitive-data-scanning categories
@@ -71,15 +92,14 @@ Creators and future tooling are free to use other category strings; these six ju
 
 - **Redaction mechanics.** *Whether* an item is redacted, and how a redacted copy relates to its original (kept alongside in a stricter zone? overwritten entirely?), is `LIFECYCLE.md` stage 4's job to describe and `ROADMAP.md` item 25 (`ptc redact`) to implement — this document only covers *classifying* an item's privacy zone, not modifying its content.
 - **Automated scanning itself.** What patterns or techniques actually detect an SSN or a credential in the wild is `ROADMAP.md` item 24 (`ptc scan`) — a Phase 4 tooling concern. This document only defines where a scan's *findings*, once a creator confirms them, get recorded.
-- **Wildcard or directory-level path matching.** Every override names one exact file. Real capsules may eventually want "everything under `data/email/2003/`" without listing each message — deferred rather than designed under speculation; see Open questions.
 
 ## Open questions
 
-- **No pattern matching yet.** Exact-path-only entries could get unwieldy for a creator who wants to restrict, say, an entire year of correspondence at once, short of making it its own `collections[]` entry. Worth revisiting once real capsules (Phase 5) show how common that actually is.
-- **Nothing validates that `path` actually exists or belongs to a declared collection.** Same limitation `METADATA.md` already flagged for `data/provenance/events.yaml`'s `collection` field — acceptable for a hand-written file today, worth a `ptc verify` structural check later (Phase 4).
+- ~~**No pattern matching yet.**~~ Resolved: `path` now supports exact-file, directory-prefix (trailing `/`), and glob (`*`/`**`/`?`) matching, with last-match-wins precedence — see "Path matching," above.
+- **Nothing validates that `path` actually exists, belongs to a declared collection, or (for a directory/glob entry) actually matches any file at all.** Same limitation `METADATA.md` already flagged for `data/provenance/events.yaml`'s `collection` field — acceptable for a hand-written file today, worth a `ptc verify` structural check later (Phase 4), which would also be the natural place to actually expand a directory/glob entry against the real manifest and report what it matched.
 - **Precedence when a collection-level and item-level policy conflict isn't formally stated**, though the intent above is that item-level always wins when present — should be made explicit and testable once `ROADMAP.md` item 14 (access/release model) defines how `release_policy` is actually evaluated end-to-end.
 - **An item-level `privacy_zone`/`release_policy` override here is not cryptographically enforced.** `ENCRYPTION.md` (item 13) encrypts by collection, not by item — a single item overridden here still shares its collection's encryption key, so its distinct policy is a recorded, procedural intent, not an independent cryptographic guarantee. A creator who needs real isolation for one item should give it its own collection instead. See `ENCRYPTION.md`'s "Encryption granularity" section.
 
 ## Status
 
-First pass, written during Phase 2 (Specification), addressing [`ROADMAP.md`](./ROADMAP.md) item 12. Still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md) — particularly the decision to keep this sparse and exact-path-only rather than supporting patterns from the start.
+First pass, written during Phase 2 (Specification), addressing [`ROADMAP.md`](./ROADMAP.md) item 12; revised to add directory-prefix and glob path matching once real `ptc import` usage (`ROADMAP.md` item 22) showed exact-path-only entries would be unwieldy for a creator who wants one policy for an entire imported batch (e.g. a whole year of photos). Still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md).
