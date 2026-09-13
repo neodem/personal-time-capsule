@@ -202,7 +202,7 @@ fn encrypt_unit(
         path: rel_path.to_string(),
         files_encrypted: targets.len(),
         already_encrypted: false,
-        key_hex: Some(to_hex(&key)),
+        key_hex: Some(cipher::to_hex(&key)),
     })
 }
 
@@ -234,10 +234,6 @@ fn append_enc_extension(path: &Path) -> PathBuf {
         .to_os_string();
     name.push(".enc");
     path.with_file_name(name)
-}
-
-fn to_hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
 #[cfg(test)]
@@ -340,7 +336,7 @@ mod tests {
 
         // Round-trip through the same Cipher confirms the on-disk bytes
         // are genuinely decryptable with the key that was reported.
-        let key = hex_to_bytes(&key_hex);
+        let key = cipher::from_hex(&key_hex).unwrap();
         let cipher = cipher::default_cipher();
         let decrypted = cipher.decrypt(&key, &ciphertext).unwrap();
         assert_eq!(decrypted, original);
@@ -487,12 +483,5 @@ mod tests {
         );
 
         assert!(encrypt(root, true).is_err());
-    }
-
-    fn hex_to_bytes(s: &str) -> Vec<u8> {
-        (0..s.len())
-            .step_by(2)
-            .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
-            .collect()
     }
 }
