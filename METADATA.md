@@ -25,7 +25,7 @@ Full PREMIS practice typically includes a metadata record for every digital obje
 So the model here operates at **event** and **batch/collection** granularity, not per-file:
 
 - **Events** — things that happened to the capsule as a whole, or to one named collection: origination, an import batch, a screening pass, sealing, a fixity check, a succession transfer.
-- **Provenance** — for import events specifically, *where a batch of material came from* (e.g. "Gmail Takeout export, jane@example.org, exported 2026-08-01"), attached to that event rather than to each file it brought in.
+- **Provenance** — for import events specifically, *where a batch of material came from* (`source`, e.g. "Gmail Takeout export, jane@example.org, exported 2026-08-01") and *where it landed* (`path`, e.g. `data/photos/1945`), attached to that event rather than to each file it brought in.
 
 If a real future need for per-file records emerges (Phase 4 tooling, or real-world validation in Phase 5), it can be added later as an additional, separate file — nothing here forecloses that; it just isn't required now.
 
@@ -46,6 +46,7 @@ Each entry is an object:
 | `agent` | yes | Free text: who or what performed the event — a person plus their [`ACTORS.md`](./ACTORS.md) role (`"Jane Smith (creator)"`), or software plus version (`"ptc CLI v0.1"`). |
 | `id` | no | A stable identifier for this event (`"evt-2026-08-30-import-email"`), in case something needs to reference it later. |
 | `collection` | no | When the event concerns one named collection rather than the whole capsule, matches a `collections[].name` in `capsule.yaml`. |
+| `path` | no | For `import` events, the destination this batch actually landed at, relative to the bag root — a single file, or the subfolder a whole imported directory was nested under (e.g. `"data/photos/1945"`). Finer-grained than `collection` for a collection assembled from several distinct import batches. |
 | `source` | no | Free-text provenance — primarily for `import` events: where did this batch come from. |
 | `outcome` | no | Free-text result, most relevant to `fixity_check` (`"pass"`, `"3 files failed checksum"`). |
 | `note` | no | Anything else worth recording. |
@@ -72,8 +73,16 @@ A capsule can log the same type more than once — e.g. multiple `import` events
   type: import
   agent: "Jane Smith (creator)"
   collection: email
+  path: "data/email"
   source: "Gmail Takeout export, jane@example.org"
   note: "~4,200 messages, 2003–2026"
+
+- date: "2026-08-31"
+  type: import
+  agent: "ptc CLI v0.1"
+  collection: photos
+  path: "data/photos/1945"
+  source: "1945 photos from Dad and Mom"
 
 - date: "2026-09-05"
   type: screening

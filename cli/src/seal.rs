@@ -65,7 +65,7 @@ pub fn seal(root: &Path) -> Result<SealSummary> {
     // that a mismatch. Caught by manual `sha256sum -c` verification against
     // a real sealed capsule while building this -- see the integration
     // test's own independent-hash assertions, added after the fact.
-    patch_lifecycle_stage(&capsule_yaml_path, "sealing")?;
+    model::patch_lifecycle_stage(&capsule_yaml_path, "sealing")?;
 
     let tag_files_hashed = hash_tag_files(root)?;
     let tag_lines: Vec<String> = tag_files_hashed
@@ -216,43 +216,6 @@ fn lines_to_file(lines: &[String]) -> String {
     }
 }
 
-/// Replace just the `lifecycle_stage:` line's value in `capsule.yaml`,
-/// leaving every other line -- including any hand-written comments --
-/// untouched. Deliberately not a full serde re-serialize: see model.rs's
-/// `write_capsule_yaml` doc comment for why that would lose comments.
-fn patch_lifecycle_stage(path: &Path, new_stage: &str) -> Result<()> {
-    let original =
-        fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
-
-    let mut found = false;
-    let mut patched_lines: Vec<String> = Vec::new();
-    for line in original.lines() {
-        let trimmed = line.trim_start();
-        if trimmed.starts_with("lifecycle_stage:") {
-            let indent_len = line.len() - trimmed.len();
-            let indent = &line[..indent_len];
-            patched_lines.push(format!("{}lifecycle_stage: {}", indent, new_stage));
-            found = true;
-        } else {
-            patched_lines.push(line.to_string());
-        }
-    }
-
-    if !found {
-        bail!(
-            "could not find a `lifecycle_stage:` line in {} to update",
-            path.display()
-        );
-    }
-
-    let mut patched = patched_lines.join("\n");
-    if original.ends_with('\n') {
-        patched.push('\n');
-    }
-
-    fs::write(path, patched).with_context(|| format!("writing {}", path.display()))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -277,24 +240,5 @@ mod tests {
             description: None,
         };
         assert!(guard_against_placeholder_release_policy(&policy).is_ok());
-    }
-
-    #[test]
-    fn patch_lifecycle_stage_preserves_comments() {
-        let dir = tempfile::tempdir().expect("tempdir");
-        let path = dir.path().join("capsule.yaml");
-        fs::write(
-            &path,
-            "status:\n  # a hand-written comment\n  lifecycle_stage: origination\nother: true\n",
-        )
-        .unwrap();
-
-        patch_lifecycle_stage(&path, "sealing").unwrap();
-
-        let result = fs::read_to_string(&path).unwrap();
-        assert_eq!(
-            result,
-            "status:\n  # a hand-written comment\n  lifecycle_stage: sealing\nother: true\n"
-        );
     }
 }

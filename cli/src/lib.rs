@@ -9,5 +9,6 @@
 //! semver promise, at least for now.
 
 pub mod checksum;
+pub mod import;
 pub mod model;
 pub mod seal;

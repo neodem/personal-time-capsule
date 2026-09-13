@@ -40,7 +40,7 @@ Unlike Phase 2's model documents, "🚧" here specifically means *drafted by non
 Started early/experimentally (see `cli/`) — the spec (Phases 2–3) has since fully caught up, so this is no longer "out of order," but the CLI itself is still an early reference implementation. Building one command at a time, same branch+PR+review pattern as Phases 2–3. See `cli/README.md`'s "Stability" section: the CLI's flags/output/exit-codes are this project's public integration contract, not its internal Rust types.
 
 21. 🚧 `ptc init` — `cli/` (Rust; non-interactive/flags-only, now backed by a real `serde` capsule model, see `cli/README.md`)
-22. ⬜ `ptc import`
+22. 🚧 `ptc import` — `cli/` (LIFECYCLE.md stage 2; copies a file/directory into `data/<collection>/`, auto-registers the collection in `capsule.yaml` if new, and logs an `import` event in `data/provenance/events.yaml`; refuses once a capsule is past the pre-seal amend loop)
 23. ⬜ `ptc inspect`
 24. ⬜ `ptc scan`
 25. ⬜ `ptc redact`
