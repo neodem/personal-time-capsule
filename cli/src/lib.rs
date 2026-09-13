@@ -10,6 +10,7 @@
 
 pub mod checksum;
 pub mod cipher;
+pub mod deposit;
 pub mod encrypt;
 pub mod import;
 pub mod inspect;

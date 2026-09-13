@@ -1,6 +1,6 @@
 # ptc (reference CLI) — experimental
 
-An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, `ptc inspect`, `ptc scan`, `ptc redact`, `ptc seal`, `ptc encrypt`, and `ptc verify` exist so far. This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
+An early, experimental prototype of the reference CLI described in [`ROADMAP.md`](../ROADMAP.md) items 21–29 (plus 25a). `ptc init`, `ptc import`, `ptc inspect`, `ptc scan`, `ptc redact`, `ptc seal`, `ptc encrypt`, `ptc verify`, and `ptc deposit` exist so far — every item in `ROADMAP.md` now has at least a first pass except `ptc unlock` (item 28, in review). This is Phase 4 (Software) work — Phase 2 (Specification) and Phase 3 (Legal, first-draft stage) are both complete, but Phase 3's legal documents still need review by a licensed attorney before they're usable; nothing here should be treated as fully authoritative until that's happened.
 
 Written in Rust; licensed [Apache-2.0](../LICENSE) like the rest of this project's code/tooling.
 
@@ -123,6 +123,18 @@ Read-only integrity check of a sealed capsule: recomputes every file's SHA-256 a
 
 Exit code is non-zero if anything actually needs attention (a hash mismatch, a missing file, or an unexpected file); zero if the only findings are informational (encrypted files noted, nothing else wrong).
 
+```sh
+ptc deposit <path> --custodian NAME [--archive OUTPUT_PATH] [--apply]
+```
+
+`LIFECYCLE.md` stage 7: the sealed (and possibly encrypted) capsule is transferred to a custodian institution. **Not a giant zip as the capsule's real format** — a capsule's canonical form stays a directory (every `manifest-sha256.txt` entry is an individually addressable file, which is the whole point). What `--archive` optionally produces is BagIt's own "serialization" concept (RFC 8493): one `.tar.gz`, purely a transport convenience, meant to be unpacked back into the same directory before anyone actually verifies anything against it.
+
+Always runs the same checksum verification as `ptc verify` first and **refuses to proceed at all if it doesn't pass** — depositing a capsule with known integrity problems is nonsensical. Dry run by default, same convention as `ptc redact`/`ptc encrypt`/`ptc unlock`: verification still runs (and still gates everything else) without `--apply`, but no archive is written and nothing is logged. `--apply` writes the archive (if `--archive` was given) and logs a `deposit` event to `preservation-log.yaml` naming the custodian, matching `LIFECYCLE.md`'s exit condition for this stage ("custodian has an independently verified copy and has agreed... to hold it"). Like `ptc encrypt`/`ptc unlock`, never touches `capsule.yaml` itself (frozen forever once sealed).
+
+**Doesn't invent a transfer protocol.** There's no custodian-facing upload API or transport mechanism defined anywhere in this spec, and building one here would overstep into `CUSTODIAN_AGREEMENT.md`/real institutional-process territory — the same restraint `ptc encrypt` showed by not inventing SLIP-0039 key distribution. Actually getting the (optional) archive or the bare directory to the custodian — courier drive, upload, whatever the deposit agreement specifies — is out of band; `ptc deposit` records that it happened, once the creator confirms it did.
+
+`--archive`'s destination must be outside the capsule directory itself — refused otherwise, since writing the archive while simultaneously reading the same tree into it would at best include a partial copy of itself.
+
 ## Known limitations / next steps
 
 - **Non-interactive only.** Both commands take everything via flags/positional args. A future version should walk a non-technical creator through the same choices interactively — the target audience for this whole project is explicitly *not* assumed to be technical.
@@ -138,4 +150,6 @@ Exit code is non-zero if anything actually needs attention (a hash mismatch, a m
 - `ptc redact --apply` has no undo mechanism beyond whatever backup/version control the creator kept themselves -- see its "no automatic backup copy" note above.
 - `ptc encrypt` isn't resumable/atomic across an interrupted run. Each file is written then its plaintext removed, one at a time; if the process dies mid-unit, files already converted stay `.enc` (fine) but any not yet reached are still plaintext, and a subsequent `ptc encrypt --apply` will treat that unit as not-yet-encrypted and issue it a *new* key covering only the remaining files -- the unit ends up split across two keys with no record tying them together beyond two separate `preservation-log.yaml` entries. Acceptable for a personal-scale reference tool; a production custody system would want this to be transactional.
 - `ptc encrypt --apply` prints each unit's raw key to stdout, which can linger in terminal scrollback/history -- a real, acknowledged exposure surface, accepted for now as the simplest, most transparent option until SLIP-0039 splitting (or some other key-handling story) exists.
-- No `ptc verify`, `ptc unlock`, or `ptc deposit` yet (`ROADMAP.md` items 27–29).
+- `ptc deposit --archive` writes the archive *before* logging the deposit event, so the archived snapshot never includes the `preservation-log.yaml` entry describing that same deposit (it can't -- the entry doesn't exist until after archiving finishes). Not a bug, just worth knowing: the custodian's own `preservation-log.yaml` going forward is where their side of the history actually starts.
+- `ptc deposit` doesn't yet check whether a capsule has any `encryption`-relevant collections that were never actually encrypted (e.g. a non-`immediate` collection nobody ran `ptc encrypt --apply` on) -- it verifies checksums, not policy compliance. A creator should confirm `ptc inspect`'s output looks right before depositing.
+- No `ptc unlock` yet (`ROADMAP.md` item 28, in review) -- the only item without at least a first pass.

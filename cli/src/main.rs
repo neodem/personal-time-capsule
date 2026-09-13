@@ -1,6 +1,7 @@
 use anyhow::{bail, Context, Result};
 use chrono::Utc;
 use clap::{Parser, Subcommand};
+use ptc::deposit::{deposit, DepositSummary};
 use ptc::encrypt::{encrypt, EncryptSummary};
 use ptc::import::{import, ImportSummary};
 use ptc::inspect::{inspect, InspectReport};
@@ -51,6 +52,10 @@ enum Command {
     /// Recompute every payload/tag file's checksum and compare against
     /// manifest-sha256.txt / tagmanifest-sha256.txt. Read-only.
     Verify(VerifyArgs),
+    /// Verify a sealed capsule, optionally archive it into one .tar.gz,
+    /// and record a deposit event naming the custodian. Dry run by
+    /// default -- pass --apply to actually archive/log.
+    Deposit(DepositArgs),
 }
 
 #[derive(clap::Args)]
@@ -161,6 +166,30 @@ struct VerifyArgs {
     path: PathBuf,
 }
 
+#[derive(clap::Args)]
+struct DepositArgs {
+    /// Path to the capsule directory to deposit. Must already be sealed
+    /// and pass verification.
+    path: PathBuf,
+
+    /// Name of the custodian institution accepting this deposit, recorded
+    /// as the deposit event's agent.
+    #[arg(long)]
+    custodian: String,
+
+    /// Also serialize the capsule into one .tar.gz at this path, purely
+    /// as a transport convenience (BagIt's own "serialization" concept)
+    /// -- must be outside the capsule directory itself.
+    #[arg(long)]
+    archive: Option<PathBuf>,
+
+    /// Actually write the archive (if requested) and log the deposit
+    /// event. Without this, ptc deposit only verifies and reports what
+    /// it would do.
+    #[arg(long)]
+    apply: bool,
+}
+
 fn main() {
     if let Err(err) = run() {
         eprintln!("error: {err:#}");
@@ -179,6 +208,7 @@ fn run() -> Result<()> {
         Command::Seal(args) => cmd_seal(&args),
         Command::Encrypt(args) => cmd_encrypt(&args),
         Command::Verify(args) => cmd_verify(&args),
+        Command::Deposit(args) => cmd_deposit(&args),
     }
 }
 
@@ -834,4 +864,49 @@ fn cmd_verify(args: &VerifyArgs) -> Result<()> {
         println!("VERIFICATION FAILED -- see above.");
         bail!("capsule failed verification")
     }
+}
+
+fn cmd_deposit(args: &DepositArgs) -> Result<()> {
+    let DepositSummary {
+        verify_report,
+        archive_path,
+        applied,
+    } = deposit(
+        &args.path,
+        &args.custodian,
+        args.archive.as_deref(),
+        args.apply,
+    )?;
+
+    println!(
+        "Verification passed: {} payload file(s) OK, {} tag file(s) OK{}.",
+        verify_report.payload_ok,
+        verify_report.tag_ok,
+        if verify_report.payload_encrypted.is_empty() {
+            String::new()
+        } else {
+            format!(
+                ", {} encrypted (not independently verifiable until unlock)",
+                verify_report.payload_encrypted.len()
+            )
+        }
+    );
+
+    if applied {
+        if let Some(path) = &archive_path {
+            println!("Archived capsule to {path}.");
+        }
+        println!(
+            "Logged a deposit event in preservation-log.yaml (custodian: {}).",
+            args.custodian
+        );
+    } else {
+        match &archive_path {
+            Some(path) => println!("Dry run -- would archive to {path} and log a deposit event."),
+            None => println!("Dry run -- would log a deposit event (no archive requested)."),
+        }
+        println!("Re-run with --apply to actually do this.");
+    }
+
+    Ok(())
 }
