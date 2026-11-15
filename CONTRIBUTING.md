@@ -4,7 +4,11 @@ Personal Time Capsule is built in public, on purpose. Per [`PRINCIPLES.md`](./PR
 
 ## Where the project is right now
 
-**Phase 1 (Definition)** and **Phase 2 (Specification)** are both complete, and **Phase 3 (Legal)** now has a first draft of every item, including creator instructions — see [`VISION.md`](./VISION.md) for the roadmap. That means the most valuable contribution right now usually isn't code (there isn't much yet). It's scrutiny of the design documents: [`PRINCIPLES.md`](./PRINCIPLES.md), [`THREAT_MODEL.md`](./THREAT_MODEL.md), [`ACTORS.md`](./ACTORS.md), [`LIFECYCLE.md`](./LIFECYCLE.md), [`STANDARDS.md`](./STANDARDS.md), the full Phase 2 model set (`FORMAT.md`, `METADATA.md`, `INTEGRITY.md`, `PRIVACY.md`, `ENCRYPTION.md`, `ACCESS.md`, `CUSTODY.md` — especially `ENCRYPTION.md` and `CUSTODY.md`, which explicitly ask for review by anyone with real cryptographic or institutional-succession experience) — and now [`DEED_OF_GIFT.md`](./DEED_OF_GIFT.md), [`ACCESS_RESTRICTION_AGREEMENT.md`](./ACCESS_RESTRICTION_AGREEMENT.md), [`CUSTODIAN_AGREEMENT.md`](./CUSTODIAN_AGREEMENT.md), and [`SUCCESSION_INSTRUCTIONS.md`](./SUCCESSION_INSTRUCTIONS.md), which need something stronger than scrutiny: none of them are usable by anyone until a licensed attorney has actually reviewed them. If you are one, or know one who might be interested, that's the single most valuable thing this project needs right now.
+**Phase 1 (Definition)** and **Phase 2 (Specification)** are both complete, and **Phase 3 (Legal)** has a first draft of every item, including creator instructions — see [`VISION.md`](./VISION.md) for the roadmap. **Phase 4 (Software)** is now underway too: a reference CLI at [`cli/`](./cli) implements every lifecycle stage (`ptc init` through `ptc deposit`) — see [`cli/README.md`](./cli/README.md).
+
+That means contributions are useful in two different shapes right now. First, scrutiny of the design documents: [`PRINCIPLES.md`](./PRINCIPLES.md), [`THREAT_MODEL.md`](./THREAT_MODEL.md), [`ACTORS.md`](./ACTORS.md), [`LIFECYCLE.md`](./LIFECYCLE.md), [`STANDARDS.md`](./STANDARDS.md), the full Phase 2 model set (`FORMAT.md`, `METADATA.md`, `INTEGRITY.md`, `PRIVACY.md`, `ENCRYPTION.md`, `ACCESS.md`, `CUSTODY.md` — especially `ENCRYPTION.md` and `CUSTODY.md`, which explicitly ask for review by anyone with real cryptographic or institutional-succession experience) — and [`DEED_OF_GIFT.md`](./DEED_OF_GIFT.md), [`ACCESS_RESTRICTION_AGREEMENT.md`](./ACCESS_RESTRICTION_AGREEMENT.md), [`CUSTODIAN_AGREEMENT.md`](./CUSTODIAN_AGREEMENT.md), and [`SUCCESSION_INSTRUCTIONS.md`](./SUCCESSION_INSTRUCTIONS.md), which need something stronger than scrutiny: none of them are usable by anyone until a licensed attorney has actually reviewed them. If you are one, or know one who might be interested, that's the single most valuable thing this project needs right now.
+
+Second, now that there's real code: review or extend `cli/`, particularly its documented "Known limitations" (see `cli/README.md`) — SLIP-0039 key-splitting most of all, since no solid, actively-maintained Rust crate exists for it yet.
 
 ## The most useful thing you can do: challenge an assumption
 
@@ -14,7 +18,7 @@ If something in this repo is naive, wrong, already solved better elsewhere, or m
 
 - **Discuss** — comment on an existing issue, or open a new one for a question that doesn't fit the template.
 - **Propose doc changes** — small wording/clarity fixes can go straight to a pull request; anything that changes a principle, threat, actor, or lifecycle stage should start as an issue first so it can be discussed before the doc changes.
-- **Contribute code** — once Phase 4 (Software) starts, the same rule applies: open an issue to discuss the approach before a large PR, so design disagreements surface before implementation work is wasted.
+- **Contribute code** — the same rule applies to `cli/`: open an issue to discuss the approach before a large PR, so design disagreements surface before implementation work is wasted.
 
 ## Ground rules
 
