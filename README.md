@@ -35,13 +35,16 @@ See [`STANDARDS.md`](./STANDARDS.md) for what each of these is, why we depend on
 
 ## Status
 
-Phase 1 (name, mission, principles, threat model, actors, capsule lifecycle) and Phase 2 (specification) are both done — see [`PRINCIPLES.md`](./PRINCIPLES.md), [`THREAT_MODEL.md`](./THREAT_MODEL.md), [`ACTORS.md`](./ACTORS.md), [`LIFECYCLE.md`](./LIFECYCLE.md), [`FORMAT.md`](./FORMAT.md) (directory structure and `capsule.yaml`), [`METADATA.md`](./METADATA.md) (event/provenance log), [`INTEGRITY.md`](./INTEGRITY.md) (fixity-check cadence and failure response), [`PRIVACY.md`](./PRIVACY.md) (per-item privacy overrides), [`ENCRYPTION.md`](./ENCRYPTION.md) (encryption algorithm and key-splitting scheme), [`ACCESS.md`](./ACCESS.md) (what confirms each release trigger), and [`CUSTODY.md`](./CUSTODY.md) (what custodian/trustee succession looks like procedurally). Phase 3 (legal) now has a first draft of every item too: [`DEED_OF_GIFT.md`](./DEED_OF_GIFT.md), [`ACCESS_RESTRICTION_AGREEMENT.md`](./ACCESS_RESTRICTION_AGREEMENT.md), [`CUSTODIAN_AGREEMENT.md`](./CUSTODIAN_AGREEMENT.md), and [`SUCCESSION_INSTRUCTIONS.md`](./SUCCESSION_INSTRUCTIONS.md) — **all drafted by non-lawyers and explicitly not usable until reviewed by a licensed attorney**, a stronger caveat than the Phase 2 documents carry — plus [`templates/legal/creator-instructions.md`](./templates/legal/creator-instructions.md), a lighter, personal worksheet rather than a binding agreement. If you want the plain-language version instead of the technical spec, see [`CREATOR_GUIDE.md`](./CREATOR_GUIDE.md).
+At a glance:
 
-Phase 4 (software) is underway: a reference CLI at [`cli/`](./cli) (Rust) now implements every stage of the lifecycle end to end — `ptc init`, `import`, `inspect`, `scan`, `redact`, `seal`, `encrypt`, `verify`, `unlock`, and `deposit` — see [`cli/README.md`](./cli/README.md) for usage and each command's known limitations. None of it is production-grade custody tooling yet; real cryptographic key-splitting (SLIP-0039) in particular remains an open, documented gap pending a usable Rust crate.
+- **The idea and the full technical spec** — done.
+- **Legal paperwork** (deed of gift, custodian agreement, etc.) — first drafts exist, but **not usable yet** — a licensed attorney still needs to review them.
+- **Actual software** — underway. A working command-line tool at [`cli/`](./cli) can already walk a capsule through its whole lifecycle, start to finish, though it's not production-ready.
+- **Real-world feedback** — just starting. That's what this repo being public is for.
 
-See [`ROADMAP.md`](./ROADMAP.md) for the full numbered item list and current status, [`research/`](./research) for open questions and background reading, and the [issues](../../issues) for active discussion.
+Not technical, and don't want to wade through the full spec? Start with [`CREATOR_GUIDE.md`](./CREATOR_GUIDE.md) instead — same project, in plain language. For the complete, document-by-document breakdown, see [`ROADMAP.md`](./ROADMAP.md).
 
-We want archivists, historians, preservation specialists, cryptographers, and estate lawyers to poke holes in this. If something here is naive, wrong, or has already been solved better elsewhere, please say so — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) for how.
+We want archivists, historians, preservation specialists, cryptographers, and estate lawyers to poke holes in this. If something here is naive, wrong, or has already been solved better elsewhere, please say so — **you don't need to know git, GitHub, or any coding at all to do that** — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) for how.
 
 ## License
 
