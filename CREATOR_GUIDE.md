@@ -62,7 +62,7 @@ If you're reading this hoping to make a capsule today: not yet, but soon-ish, an
 - [`README.md`](./README.md) and [`VISION.md`](./VISION.md) — the fuller pitch and mission
 - [`ROADMAP.md`](./ROADMAP.md) — exactly what's built and what isn't, right now
 - [`FORMAT.md`](./FORMAT.md) — the technical specification, if you want it
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md) — if something here seems wrong, missing, or naive, that's wanted feedback, not an inconvenience
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md) — if something here seems wrong, missing, or naive, that's wanted feedback, not an inconvenience. No coding or technical background needed — it opens with exactly how to say so in two minutes
 
 ## Status
 
