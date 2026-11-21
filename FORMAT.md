@@ -55,6 +55,22 @@ Two decisions worth calling out explicitly:
 
 Collection directory names under `data/` (`photos/`, `email/`, `writing/`, ...) are creator-defined — nothing in the format requires a fixed taxonomy. `capsule.yaml`'s `collections` list is what actually names and describes them.
 
+## Scale
+
+Worth sizing concretely, since "a directory of plain files" undersells how large a real capsule gets. A capsule is **not one file** — `data/` holds payload in its native format, so a full personal archive is realistically tens to hundreds of thousands of individual files, not a single blob. (`ptc deposit --archive` can wrap the whole thing into one `.tar.gz` purely for transport — BagIt's own "serialization" concept — but that's packaging for shipping, not the capsule's real, persistent shape; it gets unpacked back into a directory before anything is actually verified.)
+
+Rough sizing, for one person's thorough, decades-long archive:
+
+| Collection | Typical size |
+|---|---|
+| Email | A few GB to ~30GB — even 20+ years of exported mail, attachments included, rarely exceeds this |
+| Documents/writing | Usually well under 5GB — text is small |
+| Audio | A few GB, highly variable |
+| Photos | Tens to low hundreds of GB — modern phone photos run 2-8MB each, and 20-50k photos adds up fast |
+| Video | Often the single largest collection by far — a few minutes of 4K phone video is already hundreds of MB |
+
+Put together, a genuinely complete capsule most often lands somewhere in the **low hundreds of GB to low single-digit TB**, dominated by photos and video; a text-only archive with no video could stay under 50GB. This has two real, currently unaddressed downstream consequences: it's why `CUSTODY.md`'s deposit-mechanics guidance favors physical media over network transfer at this scale, and it's a real cost input nobody has sized yet for the funding-sustainability gap `CUSTODIAN_AGREEMENT.md` already flags (decades of storage for a multi-hundred-GB-to-multi-TB capsule, replicated across a custodian chain, isn't free).
+
 ### Tag files
 
 `bagit.txt` is fixed, two-line, required-by-RFC-8493 content — every capsule's is identical:
@@ -129,4 +145,4 @@ Named groupings of payload content under `data/`. Each collection has a `name` a
 
 ## Status
 
-Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). Every item the "Open questions" section above once listed is now resolved by a dedicated model document (`METADATA.md`, `INTEGRITY.md`, `PRIVACY.md`, `ENCRYPTION.md`, `ACCESS.md`, `CUSTODY.md`) — Phase 2 (Specification) is complete as of item 15. Item 8a (capsule series) was added afterward, prompted by a design conversation about whether a creator should make one capsule or several over a lifetime — a first draft, not yet validated against a real multi-capsule example the way items 7-8 are. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.
+Structurally complete for [`ROADMAP.md`](./ROADMAP.md) items 7 (directory structure) and 8 (`capsule.yaml`): a real example bag ([`examples/minimal-capsule/`](./examples/minimal-capsule/)) exists with computed checksums that pass verification, and its `capsule.yaml` validates against [`schema/capsule.schema.json`](./schema/capsule.schema.json). Every item the "Open questions" section above once listed is now resolved by a dedicated model document (`METADATA.md`, `INTEGRITY.md`, `PRIVACY.md`, `ENCRYPTION.md`, `ACCESS.md`, `CUSTODY.md`) — Phase 2 (Specification) is complete as of item 15. Item 8a (capsule series) was added afterward, prompted by a design conversation about whether a creator should make one capsule or several over a lifetime — a first draft, not yet validated against a real multi-capsule example the way items 7-8 are. The "Scale" section was added later still, prompted by a Phase 5 conversation about what it actually takes to ship a capsule to a custodian — a real property of the format that nothing here had previously sized. Everything here should still be considered open to challenge per `CONTRIBUTING.md` — especially by anyone with real BagIt-profile or archival-metadata experience.

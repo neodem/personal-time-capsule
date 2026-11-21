@@ -79,6 +79,7 @@ Stages 1–4 (and arguably 5) aren't strictly linear. A creator can return to im
 The sealed, encrypted capsule is transferred to a custodian institution (or several, for redundancy per LOCKSS philosophy). The custodian verifies the manifest on receipt and confirms acceptance.
 
 - **Actors:** creator/assistant → custodian institution.
+- **Notable:** at real-world scale (`FORMAT.md`'s "Scale" section puts a thorough personal archive at low hundreds of GB to low single-digit TB) this is usually a physical-media transfer, not a network upload — see `CUSTODY.md`'s "Initial deposit" section for the actual mechanics.
 - **Exit condition:** custodian has an independently verified copy and has agreed (per whatever Phase 3 deposit agreement applies) to hold it.
 
 ## 8. Dormant preservation
