@@ -6,6 +6,23 @@ Phase 2 (Specification) — [`ROADMAP.md`](./ROADMAP.md) item 15, the last Phase
 
 Same reasoning `METADATA.md` and `INTEGRITY.md` already established for `status.lifecycle_stage` and `events.yaml`: `custody.primary`/`custody.successors` is frozen at sealing and describes the creator's *original* plan, not who currently, actually holds the capsule. After any succession event, the capsule's real current custodian is whoever most recently appears as the receiving party in a `succession_transfer` entry in `preservation-log.yaml` — `capsule.yaml` itself is never rewritten to match, for the same reason it can't be: it's sealed.
 
+## Initial deposit: creator to primary custodian
+
+A different event from everything below it — this happens once, not repeatedly, and there's no prior custodian to verify against, only the creator's own sealed copy. `LIFECYCLE.md` stage 7 names this stage but doesn't work out the mechanics; this is where that actually happens.
+
+**Physical media, not network transfer, for anything beyond a modest capsule.** `FORMAT.md`'s "Scale" section sizes a genuinely complete personal archive at low hundreds of GB to low single-digit TB, dominated by photos and video. At that size, uploading over a typical residential connection (upload speed is usually far slower than download) can take days of continuous transfer — shipping a hard drive is often both faster and more reliable. This isn't a workaround; it's standard practice in the archives field already, and several institutions explicitly accept physical media as a donation format for exactly this reason.
+
+The sequence:
+
+1. **Seal, then encrypt if applicable** (`LIFECYCLE.md` stages 5-6) before anything leaves the creator's hands.
+2. **Copy the sealed capsule onto the drive as a plain directory.** Skip `.tar.gz` compression for a media-heavy capsule — gzip gains essentially nothing on already-compressed JPEGs, video, or `.enc` ciphertext, and just costs time. Compression is only worth it for a genuinely text/email-dominated capsule.
+3. **Run `ptc verify` before the drive ships.** Confirms the copy is good before anything can go wrong in transit — bit rot on the drive, physical damage, a dropped file during copying.
+4. **Key material travels separately from the data, if encryption is in use.** Never ship the same drive, or the same package, carrying both ciphertext and a trustee's key share — that defeats the point of splitting the key at all. Keys/shares go to trustees through whatever channel was already agreed, independent of how the data itself travels.
+5. **The custodian runs `ptc verify` again on arrival**, independent of how the copy physically got there. This is the actual point of the manifest: it lets the custodian confirm nothing was corrupted or tampered with in transit, without having to trust the courier, the drive, or the creator's own claim that nothing changed.
+6. **Only after verification passes does custody formally transfer** — logged as a `deposit` entry in `preservation-log.yaml` (`INTEGRITY.md`; `ptc deposit` already does this), not a `succession_transfer` — that type is reserved for a *later* change of hands, covered below. Only once this is logged does the custodian's own internal storage strategy (their cloud, tape, on-prem replication) become their business, not the creator's.
+
+**A single drive shipped once is a real, if temporary, single point of failure** — lost in transit, damaged, or destroyed before the custodian has made their own copies. Keeping the creator's own copy until verification is confirmed is cheap insurance, and doesn't substitute for the custodian actually executing LOCKSS-style replication (`THREAT_MODEL.md` #1) promptly once they do have a verified copy.
+
 ## Custodian succession
 
 ### What triggers it
@@ -90,7 +107,8 @@ A fundamentally different problem from custodian succession. A custodian holds a
 - **Exhausted succession chains** (custodian or trustee) have no resolution here, only the mitigation-by-design described above. Real capsules and real institutional failures (Phase 5) are the only way to learn whether that's enough in practice.
 - **Old trustee shares from a no-fault departure aren't cryptographically revoked**, only made irrelevant going forward — if the underlying key wasn't rotated, an old share technically still reconstructs it. This relies on the departed trustee actually destroying their old share, which this document can recommend but not enforce, similar to every other honesty-dependent step in this project's threat model.
 - **Legal standing for a new, previously undesignated custodian** stepping in after an exhausted chain isn't addressed — Phase 3.
+- **How many physical copies a creator should make before initial deposit, and whether each custodian in the chain should receive its own shipment versus relying on the primary to replicate onward**, isn't addressed. Neither is who bears the cost or liability if a shipped drive is lost or damaged in transit.
 
 ## Status
 
-First pass, written during Phase 2 (Specification), addressing [`ROADMAP.md`](./ROADMAP.md) item 15 — the last Phase 2 item. Amended during Phase 3 to add breach of the Access Restriction Agreement as a third custodian-succession trigger (`ACCESS_RESTRICTION_AGREEMENT.md`, item 17). Still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md), especially the reactive-vs-proactive trustee rotation call and the for-cause/no-fault distinction, which haven't been reviewed by anyone with real institutional succession or cryptographic key-management experience.
+First pass, written during Phase 2 (Specification), addressing [`ROADMAP.md`](./ROADMAP.md) item 15 — the last Phase 2 item. Amended during Phase 3 to add breach of the Access Restriction Agreement as a third custodian-succession trigger (`ACCESS_RESTRICTION_AGREEMENT.md`, item 17). Amended again after a Phase 5 conversation to add the "Initial deposit" section above — the creator-to-primary-custodian transfer this document had never actually worked out, despite covering every later succession transfer in detail. Still open to challenge per [`CONTRIBUTING.md`](./CONTRIBUTING.md), especially the reactive-vs-proactive trustee rotation call and the for-cause/no-fault distinction, which haven't been reviewed by anyone with real institutional succession or cryptographic key-management experience.
